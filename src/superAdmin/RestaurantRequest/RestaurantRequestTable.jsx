@@ -39,6 +39,10 @@ const RestaurantRequestTable = ({ isDashboard, name }) => {
         {/* Table */}
         {superAdmin.loading ? (
           <LoadingSpinner />
+        ) : displayedRestaurants.length === 0 ? (
+          <div className="text-center py-10 text-neutral-500">
+            <p className="text-lg font-semibold">No pending requests.</p>
+          </div>
         ) : (
           <Table>
             <TableHead>

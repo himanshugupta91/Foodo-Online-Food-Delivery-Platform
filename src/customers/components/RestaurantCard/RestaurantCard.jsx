@@ -1,22 +1,32 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToFavorites } from "../../../state/authentication/Action";
 import { isPresentInFavorites } from "../../../config/logic";
 import { Heart, Star } from "lucide-react";
+import { api } from "../../../config/api";
 
 const RestaurantCard = ({ data, index }) => {
   const navigate = useNavigate();
   const { auth } = useSelector((store) => store);
   const jwt = localStorage.getItem("jwt");
   const dispatch = useDispatch();
+  const [avgRating, setAvgRating] = useState(null);
+
+  useEffect(() => {
+    if (data?.id) {
+      api.get(`/review/restaurant/${data.id}/average-rating`)
+        .then((res) => setAvgRating(res.data?.data))
+        .catch(() => setAvgRating(null));
+    }
+  }, [data?.id]);
 
   const handleAddToFavorites = () => {
     dispatch(addToFavorites({ restaurantId: data.id, jwt: auth.jwt || jwt }));
   };
 
   const navigateToRestaurant = () => {
-    if (data.open && data.id)
+    if (data.id)
       navigate(`/restaurant/${data.address?.city || 'city'}/${data.name}/${data.id}`);
   };
 
@@ -25,7 +35,7 @@ const RestaurantCard = ({ data, index }) => {
       {/* Image Container */}
       <div
         onClick={navigateToRestaurant}
-        className={`${data.open ? "cursor-pointer" : "cursor-not-allowed"} relative h-[12rem] md:h-[10rem] overflow-hidden`}
+        className="cursor-pointer relative h-[12rem] md:h-[10rem] overflow-hidden"
       >
         <img
           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
@@ -69,7 +79,7 @@ const RestaurantCard = ({ data, index }) => {
             {data.name}
           </h3>
           <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-lg border border-green-100">
-            <span className="text-green-700 font-bold text-xs">{data.rating || "4.5"}</span>
+            <span className="text-green-700 font-bold text-xs">{avgRating != null && avgRating > 0 ? avgRating.toFixed(1) : "New"}</span>
             <Star className="w-3 h-3 text-green-600 fill-green-600" />
           </div>
         </div>
@@ -89,11 +99,7 @@ const RestaurantCard = ({ data, index }) => {
 
           <button
             onClick={navigateToRestaurant}
-            disabled={!data.open}
-            className={`text-sm font-semibold px-5 py-2 rounded-full transition-all shadow-sm ${data.open
-              ? "bg-neutral-900 text-white hover:bg-primary-600 hover:shadow-md hover:-translate-y-0.5"
-              : "bg-neutral-100 text-neutral-400 cursor-not-allowed"
-              }`}
+            className="text-sm font-semibold px-5 py-2 rounded-full transition-all shadow-sm bg-neutral-900 text-white hover:bg-primary-600 hover:shadow-md hover:-translate-y-0.5"
           >
             View Menu
           </button>

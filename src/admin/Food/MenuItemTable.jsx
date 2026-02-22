@@ -1,43 +1,23 @@
-import {
-  Avatar,
-  Backdrop,
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  CircularProgress,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteFoodAction,
   getMenuItemsByRestaurantId,
+  searchAdminMenuItem,
   updateMenuItemsAvailability,
 } from "../../state/customers/Menu/menu.action";
-import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 import { categorizedIngredients } from "../../customers/util/CategorizeIngredients";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Create } from "@mui/icons-material";
+import { Search, Trash2, Plus } from "lucide-react";
 
 const MenuItemTable = ({ isDashboard, name }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { menu, ingredients, restaurant, auth } = useSelector((store) => store);
   const jwt = localStorage.getItem("jwt");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-
     if (restaurant.usersRestaurant) {
       dispatch(getMenuItemsByRestaurantId({
         restaurantId: restaurant.usersRestaurant?.id,
@@ -48,17 +28,7 @@ const MenuItemTable = ({ isDashboard, name }) => {
         foodCategory: "",
       }));
     }
-
-
   }, [ingredients.update, restaurant.usersRestaurant, dispatch]);
-
-  // console.log(
-  //   "-------- ",
-  //   menu.menuItems[1].ingredients,
-  //   categorizedIngredients(menu.menuItems[1].ingredients)
-  // );
-
-
 
   const handleFoodAvialability = (foodId) => {
     dispatch(updateMenuItemsAvailability({ foodId, jwt: auth.jwt || jwt }));
@@ -68,141 +38,135 @@ const MenuItemTable = ({ isDashboard, name }) => {
     dispatch(deleteFoodAction({ foodId, jwt: auth.jwt || jwt }));
   };
 
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if (value.trim()) {
+      dispatch(searchAdminMenuItem({ name: value, jwt: auth.jwt || jwt }));
+    } else if (restaurant.usersRestaurant) {
+      dispatch(getMenuItemsByRestaurantId({
+        restaurantId: restaurant.usersRestaurant?.id,
+        jwt: auth.jwt || jwt,
+        seasonal: false,
+        vegetarian: false,
+        nonveg: false,
+        foodCategory: "",
+      }));
+    }
+  };
+
   return (
-    <Box width={"100%"}>
-      <Card className="mt-1">
-        <CardHeader
-          title={name}
-          sx={{
-            pt: 2,
-            alignItems: "center",
-            "& .MuiCardHeader-action": { mt: 0.6 },
-          }}
-          action={
-            <IconButton onClick={() => navigate("/admin/restaurant/add-menu")}>
-              <Create />
-            </IconButton>
-          }
-        />
-        <TableContainer>
-          <Table aria-label="table in dashboard">
-            <TableHead>
-              <TableRow>
-                <TableCell>Image</TableCell>
-                <TableCell>Title</TableCell>
-                {/* <TableCell sx={{ textAlign: "center" }}>Category</TableCell> */}
-                {!isDashboard && (
-                  <TableCell sx={{ textAlign: "" }}>
-                    Ingredients
-                  </TableCell>
-                )}
-                <TableCell sx={{ textAlign: "center" }}>Price</TableCell>
-                {/* <TableCell sx={{ textAlign: "center" }}>Quantity</TableCell> */}
+    <div className="w-full">
+      {/* Header */}
+      {(name || !isDashboard) && (
+        <div className="flex items-center justify-between mb-4 px-1">
+          {name && <h2 className="font-display text-2xl font-bold text-neutral-900">{name}</h2>}
+          {!isDashboard && (
+            <button
+              onClick={() => navigate("/admin/restaurant/add-menu")}
+              className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Item
+            </button>
+          )}
+        </div>
+      )}
 
-                <TableCell sx={{ textAlign: "center" }}>Availabilty</TableCell>
-                {!isDashboard && (
-                  <TableCell sx={{ textAlign: "center" }}>Delete</TableCell>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+      {/* Search */}
+      {!isDashboard && (
+        <div className="mb-4 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search food items by name..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all"
+          />
+        </div>
+      )}
+
+      {/* Table */}
+      {menu.loading ? (
+        <div className="flex justify-center py-12">
+          <div className="spinner" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-neutral-200 bg-neutral-50/50">
+                <th className="text-left px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Image</th>
+                <th className="text-left px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Title</th>
+                {!isDashboard && <th className="text-left px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Ingredients</th>}
+                <th className="text-center px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Price</th>
+                <th className="text-center px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Availability</th>
+                {!isDashboard && <th className="text-center px-4 py-3 font-semibold text-neutral-600 text-xs uppercase tracking-wider">Delete</th>}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
               {menu.menuItems?.map((item) => (
-                <TableRow
-                  hover
-                  key={item.id}
-                  sx={{
-                    "&:last-of-type td, &:last-of-type th": { border: 0 },
-                  }}
-                >
-                  <TableCell>
-                    {" "}
-                    <Avatar alt={item.name} src={item.images[0]} />{" "}
-                  </TableCell>
-
-                  <TableCell
-                    sx={{ py: (theme) => `${theme.spacing(0.5)} !important` }}
-                  >
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      <Typography
-                        sx={{
-                          fontWeight: 500,
-                          fontSize: "0.875rem !important",
-                        }}
-                      >
-                        {item.name}
-                      </Typography>
-                      <Typography variant="caption">{item.brand}</Typography>
-                    </Box>
-                  </TableCell>
-
+                <tr key={item.id} className="hover:bg-neutral-50/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <img
+                      src={item.images?.[0] || "/default-food.png"}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-neutral-900">{item.name}</span>
+                      {item.brand && <span className="text-xs text-neutral-500">{item.brand}</span>}
+                    </div>
+                  </td>
                   {!isDashboard && (
-                    <TableCell>
-                      {Object.keys(
-                        categorizedIngredients(item?.ingredients)
-                      )?.map((category) => (
-                        <div key={category}>
-                          <p className="font-semibold">{category}</p>
-                          <div className="pl-5">
-                            {categorizedIngredients(item?.ingredients)[
-                              category
-                            ].map((ingredient, index) => (
-                              <div
-                                key={ingredient.id}
-                                className="flex gap-1 items-center"
-                              >
-                                <div>
-                                  <HorizontalRuleIcon
-                                    sx={{ fontSize: "1rem" }}
-                                  />
-                                </div>
-                                <div
-                                  key={ingredient.id}
-                                  className="flex gap-4 items-center"
-                                >
-                                  <p>{ingredient.name}</p>
-                                </div>
-                              </div>
+                    <td className="px-4 py-3">
+                      {Object.keys(categorizedIngredients(item?.ingredients) || {}).map((category) => (
+                        <div key={category} className="mb-1">
+                          <p className="font-semibold text-neutral-700 text-xs">{category}</p>
+                          <div className="flex gap-1 flex-wrap pl-2 mt-0.5">
+                            {categorizedIngredients(item?.ingredients)[category].map((ingredient) => (
+                              <span key={ingredient.id} className="bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded-full">
+                                {ingredient.name}
+                              </span>
                             ))}
                           </div>
                         </div>
                       ))}
-                    </TableCell>
+                    </td>
                   )}
-                  <TableCell sx={{ textAlign: "center" }}>
+                  <td className="px-4 py-3 text-center font-semibold text-neutral-800">
                     ₹{item.price}
-                  </TableCell>
-
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Button
-                      color={item.available ? "success" : "error"}
-                      variant="text"
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
                       onClick={() => handleFoodAvialability(item.id)}
+                      className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${item.available
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
+                          : "bg-red-100 text-red-700 hover:bg-red-200"
+                        }`}
                     >
-                      {item.available ? "in stock" : "out of stock"}
-                    </Button>
-                  </TableCell>
-
+                      {item.available ? "In Stock" : "Out of Stock"}
+                    </button>
+                  </td>
                   {!isDashboard && (
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton onClick={() => handleDeleteFood(item.id)}>
-                        <DeleteIcon color="error" />
-                      </IconButton>
-                    </TableCell>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleDeleteFood(item.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   )}
-                </TableRow>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={menu.loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    </Box>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 };
 

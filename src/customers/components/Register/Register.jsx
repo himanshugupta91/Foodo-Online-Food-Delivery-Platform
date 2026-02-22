@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../../state/authentication/Action";
 import PasswordStrength from "../../../components/ui/PasswordStrength";
 
@@ -27,6 +27,7 @@ const validationSchema = Yup.object({
 const RegistrationForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { auth } = useSelector((store) => store);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,6 +46,12 @@ const RegistrationForm = () => {
       <p className="text-neutral-600 text-center mb-8">
         Join Foodo and start ordering delicious food
       </p>
+
+      {auth.error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center" role="alert">
+          <span className="block sm:inline">{auth.error}</span>
+        </div>
+      )}
 
       <Formik
         initialValues={initialValues}

@@ -15,27 +15,54 @@ import {
   REQUEST_RESET_PASSWORD_FAILURE,
   REQUEST_RESET_PASSWORD_REQUEST,
   REQUEST_RESET_PASSWORD_SUCCESS,
+  ADD_ADDRESS_REQUEST,
+  ADD_ADDRESS_SUCCESS,
+  ADD_ADDRESS_FAILURE
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 import axios from "axios";
 
+
+/**
+ * @typedef {Object} LoginRequest
+ * @property {string} email
+ * @property {string} password
+ */
+
+/**
+ * @typedef {Object} RegisterRequest
+ * @property {string} fullName
+ * @property {string} email
+ * @property {string} password
+ * @property {string} role
+ */
+
+/**
+ * Registers a new user.
+ * @param {Object} reqData
+ * @param {RegisterRequest} reqData.userData - User registration details
+ * @param {Function} reqData.navigate - Navigation function
+ */
 export const registerUser = (reqData) => async (dispatch) => {
   console.log("resgister request data ", reqData.userData)
   try {
     dispatch({ type: REGISTER_REQUEST });
 
     const { data } = await axios.post(`${API_URL}/auth/signup`, reqData.userData);
-    if (data.jwt) localStorage.setItem("jwt", data.jwt)
-    if (data.role === "ROLE_RESTAURANT_OWNER") {
-      reqData.navigate("/admin/restaurant")
+    if (data.data.jwt) {
+      localStorage.setItem("jwt", data.data.jwt);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
     }
-    else if (data.role === "ROLE_SUPER_ADMIN") {
+    if (data.data.role === "ROLE_RESTAURANT_OWNER") {
+      reqData.navigate("/")
+    }
+    else if (data.data.role === "ROLE_SUPER_ADMIN") {
       reqData.navigate("/super-admin")
     }
     else {
       reqData.navigate("/")
     }
-    dispatch({ type: REGISTER_SUCCESS, payload: data.jwt });
+    dispatch({ type: REGISTER_SUCCESS, payload: data.data.jwt });
   } catch (error) {
     console.log("catch error ------ ", error)
     dispatch({
@@ -48,23 +75,32 @@ export const registerUser = (reqData) => async (dispatch) => {
   }
 };
 
+/**
+ * Logs in a user.
+ * @param {Object} reqData
+ * @param {LoginRequest} reqData.data - Login credentials
+ * @param {Function} reqData.navigate - Navigation function
+ */
 export const loginUser = (reqData) => async (dispatch) => {
   try {
     dispatch({ type: LOGIN_REQUEST });
 
     const { data } = await axios.post(`${API_URL}/auth/signin`, reqData.data);
-    if (data.jwt) localStorage.setItem("jwt", data.jwt)
-    if (data.role === "ROLE_RESTAURANT_OWNER") {
-      reqData.navigate("/admin/restaurant")
+    if (data.data.jwt) {
+      localStorage.setItem("jwt", data.data.jwt);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
     }
-    else if (data.role === "ROLE_SUPER_ADMIN") {
+    if (data.data.role === "ROLE_RESTAURANT_OWNER") {
+      reqData.navigate("/")
+    }
+    else if (data.data.role === "ROLE_SUPER_ADMIN") {
       reqData.navigate("/super-admin")
     }
     else {
       reqData.navigate("/")
     }
 
-    dispatch({ type: LOGIN_SUCCESS, payload: data.jwt });
+    dispatch({ type: LOGIN_SUCCESS, payload: data.data.jwt });
   } catch (error) {
     dispatch({
       type: LOGIN_FAILURE,
@@ -77,16 +113,20 @@ export const loginUser = (reqData) => async (dispatch) => {
 };
 
 
+/**
+ * Fetches the current user's profile.
+ * @param {string} token - JWT token
+ */
 export const getUser = (token) => {
   return async (dispatch) => {
     dispatch({ type: GET_USER_REQUEST });
     try {
-      const response = await api.get(`/api/users/profile`, {
+      const response = await api.get(`/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const user = response.data;
+      const user = response.data.data;
 
       dispatch({ type: GET_USER_SUCCESS, payload: user });
       console.log("req User ", user);
@@ -97,17 +137,23 @@ export const getUser = (token) => {
   };
 };
 
+/**
+ * Adds a restaurant to favorites.
+ * @param {Object} params
+ * @param {number} params.restaurantId - ID of the restaurant
+ * @param {string} params.jwt - JWT token
+ */
 export const addToFavorites = ({ restaurantId, jwt }) => {
   return async (dispatch) => {
     dispatch({ type: ADD_TO_FAVORITES_REQUEST });
     try {
-      const { data } = await api.put(`api/restaurants/${restaurantId}/add-favorites`, {}, {
+      const { data } = await api.put(`restaurants/${restaurantId}/add-favorites`, {}, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
-      console.log("Add to favorites ", data)
-      dispatch({ type: ADD_TO_FAVORITES_SUCCESS, payload: data });
+      console.log("Add to favorites ", data);
+      dispatch({ type: ADD_TO_FAVORITES_SUCCESS, payload: data.data });
     } catch (error) {
       console.log("catch error ", error)
       dispatch({
@@ -150,9 +196,31 @@ export const resetPassword = (reqData) => async (dispatch) => {
 
 export const logout = () => {
   return async (dispatch) => {
-    dispatch({ type: LOGOUT });
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("refreshToken");
     localStorage.clear();
+    dispatch({ type: LOGOUT });
+    window.location.href = "/";
   };
+};
+
+export const addUserAddress = (reqData) => async (dispatch) => {
+  console.log("req data ", reqData)
+  dispatch({ type: ADD_ADDRESS_REQUEST });
+  try {
+    const { data } = await api.post(`/users/address`, reqData.address, {
+      headers: {
+        Authorization: `Bearer ${reqData.jwt}`,
+      },
+    });
+    console.log("address added ", data);
+    dispatch({ type: ADD_ADDRESS_SUCCESS, payload: data.data });
+    console.log("reqData ", reqData)
+    // Refresh user profile
+  } catch (error) {
+    console.log("error ", error);
+    dispatch({ type: ADD_ADDRESS_FAILURE, payload: error.message });
+  }
 };
 
 

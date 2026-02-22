@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCustomers } from "../../state/superAdmin/superAdmin.action";
+import { getCustomers, deleteCustomer } from "../../state/superAdmin/superAdmin.action";
 import { Table, TableHead, TableBody, TableRow, TableCell } from "../../components/ui/Table";
 import { Card, LoadingSpinner } from "../../components/ui/Modal";
 
@@ -11,6 +11,12 @@ const SuperAdminCustomerTable = ({ isDashboard, name }) => {
   useEffect(() => {
     dispatch(getCustomers());
   }, [dispatch]);
+
+  const handleDeleteCustomer = (email) => {
+    if (window.confirm(`Are you sure you want to delete customer ${email}?`)) {
+      dispatch(deleteCustomer(email));
+    }
+  };
 
   const displayedCustomers = isDashboard
     ? superAdmin.customers.slice(0, 7)
@@ -36,6 +42,7 @@ const SuperAdminCustomerTable = ({ isDashboard, name }) => {
                 <TableCell header>User ID</TableCell>
                 <TableCell header>Email</TableCell>
                 <TableCell header>Role</TableCell>
+                {!isDashboard && <TableCell header>Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -59,6 +66,16 @@ const SuperAdminCustomerTable = ({ isDashboard, name }) => {
                   <TableCell>
                     <span className="badge">{item.role}</span>
                   </TableCell>
+                  {!isDashboard && (
+                    <TableCell>
+                      <button
+                        onClick={() => handleDeleteCustomer(item.email)}
+                        className="text-red-600 hover:text-red-900 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

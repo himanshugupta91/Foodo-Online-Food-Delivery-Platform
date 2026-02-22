@@ -1,14 +1,23 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 import { Modal, Card } from '../../components/ui/Modal';
 import CreateCategory from './CreateCategory';
+import { deleteCategoryAction } from '../../state/customers/Restaurant/restaurant.action';
 
 const Category = () => {
-  const { restaurant } = useSelector(store => store);
+  const dispatch = useDispatch();
+  const { restaurant, auth } = useSelector(store => store);
+  const jwt = localStorage.getItem("jwt");
   const [openCreateCategory, setOpenCreateCategory] = React.useState(false);
   const handleOpenCreateCategory = () => setOpenCreateCategory(true);
   const handleCloseCreateCategory = () => setOpenCreateCategory(false);
+
+  const handleDeleteCategory = (categoryId) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      dispatch(deleteCategoryAction({ categoryId, jwt: auth.jwt || jwt }));
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -37,6 +46,7 @@ const Category = () => {
               <TableRow>
                 <TableCell header>ID</TableCell>
                 <TableCell header>Name</TableCell>
+                <TableCell header style={{ width: "100px", textAlign: "center" }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -44,6 +54,17 @@ const Category = () => {
                 <TableRow key={item.id}>
                   <TableCell>{item.id}</TableCell>
                   <TableCell>{item.name}</TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    <button
+                      onClick={() => handleDeleteCategory(item.id)}
+                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete category"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

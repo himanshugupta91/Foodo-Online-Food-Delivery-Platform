@@ -1,9 +1,7 @@
 import React from "react";
-import { Avatar, Card, CardContent, CardHeader, IconButton } from "@mui/material";
-import { red } from "@mui/material/colors";
 import StarRating from "./StarRating";
 import dayjs from "dayjs";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteReview } from "../../state/customers/Review/review.action";
 
@@ -18,35 +16,42 @@ const ReviewCard = ({ review }) => {
         }
     };
 
-    const isAdmin = auth.user?.role === "ROLE_ADMIN" || auth.user?.role === "ROLE_RESTAURANT_OWNER";
+    const isAdmin = auth.user?.role === "ROLE_RESTAURANT_OWNER";
+    const initial = review.customer?.fullName?.charAt(0).toUpperCase() || "?";
 
     return (
-        <Card className="mb-4 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader
-                avatar={
-                    <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                        {review.customer?.fullName?.charAt(0).toUpperCase()}
-                    </Avatar>
-                }
-                action={
-                    isAdmin && (
-                        <IconButton aria-label="settings" onClick={handleDeleteReview}>
-                            <DeleteIcon color="error" />
-                        </IconButton>
-                    )
-                }
-                title={review.customer?.fullName}
-                subheader={review.createdAt ? dayjs(review.createdAt).format("MMMM DD, YYYY") : ""}
-            />
-            <CardContent>
-                <div className="flex items-center mb-2">
-                    <StarRating rating={review.rating} isReadOnly={true} />
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-5 hover:shadow-md transition-shadow">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm">
+                        {initial}
+                    </div>
+                    <div>
+                        <p className="font-semibold text-neutral-800 text-sm">{review.customer?.fullName}</p>
+                        <p className="text-neutral-400 text-xs">
+                            {review.createdAt ? dayjs(review.createdAt).format("MMMM DD, YYYY") : ""}
+                        </p>
+                    </div>
                 </div>
-                <p className="text-gray-600 font-medium text-sm">
-                    {review.reviewText}
-                </p>
-            </CardContent>
-        </Card>
+                {isAdmin && (
+                    <button
+                        onClick={handleDeleteReview}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                )}
+            </div>
+
+            {/* Rating */}
+            <div className="mb-2">
+                <StarRating rating={review.rating} isReadOnly={true} />
+            </div>
+
+            {/* Review Text */}
+            <p className="text-neutral-600 text-sm leading-relaxed">{review.reviewText}</p>
+        </div>
     );
 };
 

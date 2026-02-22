@@ -5,6 +5,7 @@ import * as actionTypes from "./ActionTypes";
 const initialState = {
   cart: null,
   cartItems: [],
+  cartTotal: null,
   loading: false,
   error: null,
 };
@@ -15,6 +16,7 @@ const cartReducer = (state = initialState, action) => {
     case actionTypes.GET_ALL_CART_ITEMS_REQUEST:
     case actionTypes.UPDATE_CARTITEM_REQUEST:
     case actionTypes.REMOVE_CARTITEM_REQUEST:
+    case actionTypes.GET_CART_TOTAL_REQUEST:
       return {
         ...state,
         loading: true,
@@ -50,9 +52,16 @@ const cartReducer = (state = initialState, action) => {
           item.id !== action.payload
         ),
       };
+    case actionTypes.GET_CART_TOTAL_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        cartTotal: action.payload,
+      };
     case actionTypes.FIND_CART_FAILURE:
     case actionTypes.UPDATE_CARTITEM_FAILURE:
     case actionTypes.REMOVE_CARTITEM_FAILURE:
+    case actionTypes.GET_CART_TOTAL_FAILURE:
       // case actionTypes.GET_ALL_CART_ITEMS_FAILURE:
       return {
         ...state,
@@ -60,9 +69,9 @@ const cartReducer = (state = initialState, action) => {
         error: action.payload,
       };
 
-      case LOGOUT:
+    case LOGOUT:
       localStorage.removeItem("jwt");
-      return { ...state, cartItems:[],cart:null, success: "logout success" };
+      return { ...state, cartItems: [], cart: null, success: "logout success" };
     default:
       return state;
   }

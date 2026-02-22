@@ -14,6 +14,7 @@ const superAdminReducer = (state = initialState, action) => {
     case actionTypes.GET_PENDING_CUSTOMERS_REQUEST:
     case actionTypes.GET_PENDING_RESTAURANTS_REQUEST:
     case actionTypes.DELETE_RESTAURANT_REQUEST:
+    case actionTypes.DELETE_CUSTOMER_REQUEST:
       return {
         ...state,
         loading: true,
@@ -24,6 +25,12 @@ const superAdminReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         customers: action.payload,
+      };
+    case actionTypes.DELETE_CUSTOMER_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        customers: state.customers.filter((customer) => customer.email !== action.payload),
       };
     case actionTypes.GET_PENDING_CUSTOMERS_SUCCESS:
       return {
@@ -50,10 +57,11 @@ const superAdminReducer = (state = initialState, action) => {
     case actionTypes.GET_PENDING_RESTAURANTS_FAILURE:
     case actionTypes.DELETE_RESTAURANT_FAILURE:
     case actionTypes.UPDATE_RESTAURANT_STATUS_FAILURE:
+    case actionTypes.DELETE_CUSTOMER_FAILURE:
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        error: action.payload || action.error,
       };
     case actionTypes.UPDATE_RESTAURANT_STATUS_SUCCESS:
       return {

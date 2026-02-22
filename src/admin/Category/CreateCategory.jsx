@@ -18,9 +18,7 @@ const CreateCategory = ({ handleClose }) => {
     event.preventDefault();
     const data = {
       name: formData.categoryName,
-      restaurant: {
-        id
-      }
+      restaurantId: id,
     };
     dispatch(createCategoryAction({ reqData: data, jwt: auth.jwt || jwt }));
     setFormData({

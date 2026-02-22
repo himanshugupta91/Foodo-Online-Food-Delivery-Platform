@@ -25,7 +25,6 @@ const ProfileNavigation = ({ handleClose, open }) => {
   const handleNavigate = (item) => {
     if (item.title === "Logout") {
       handleLogout();
-      navigate("/");
     } else {
       navigate(`/my-profile/${item.path}`);
     }

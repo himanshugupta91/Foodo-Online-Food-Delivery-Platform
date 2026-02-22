@@ -1,13 +1,5 @@
 import React, { useEffect } from "react";
 import OrdersTable from "./OrderTable";
-import {
-  Card,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Typography,
-} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurantsOrder } from "../../state/admin/Order/restaurants.order.action";
@@ -15,8 +7,6 @@ import { fetchRestaurantsOrder } from "../../state/admin/Order/restaurants.order
 const orderStatus = [
   { label: "Pending", value: "PENDING" },
   { label: "Completed", value: "COMPLETED" },
-  // { label: "Out For Delivery", value: "OUT_FOR_DELIVERY" },
-  // { label: "Delivered", value: "DELIVERED" },
   { label: "All", value: "all" },
 ];
 
@@ -32,13 +22,15 @@ const RestaurantsOrder = () => {
   const filterValue = searchParams.get("order_status");
 
   useEffect(() => {
-    dispatch(
-      fetchRestaurantsOrder({
-        restaurantId: restaurant.usersRestaurant?.id,
-        orderStatus: filterValue,
-        jwt: auth.jwt || jwt,
-      })
-    );
+    if (restaurant.usersRestaurant?.id) {
+      dispatch(
+        fetchRestaurantsOrder({
+          restaurantId: restaurant.usersRestaurant?.id,
+          orderStatus: filterValue,
+          jwt: auth.jwt || jwt,
+        })
+      );
+    }
   }, [auth.jwt, filterValue, restaurant.usersRestaurant, dispatch, jwt]);
 
   const handleFilter = (e, value) => {
@@ -53,32 +45,37 @@ const RestaurantsOrder = () => {
   };
 
   return (
-    <div className="px-2 animate-fade-in">
-      <Card className="p-5">
-        <Typography sx={{ paddingBottom: "1rem" }} variant="h5">
-          Order Status
-        </Typography>
-        <FormControl className="py-10" component="fieldset">
-          <RadioGroup
-            row
-            name="category"
-            value={filterValue ? filterValue : "all"}
-            onChange={handleFilter}
-          >
-            {orderStatus.map((item, index) => (
-              <FormControlLabel
-                key={index}
+    <div className="px-2 animate-fade-in space-y-6">
+      {/* Filter Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
+        <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">Order Status</h2>
+        <div className="flex flex-wrap gap-3">
+          {orderStatus.map((item, index) => (
+            <label
+              key={index}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors text-sm font-medium border ${(filterValue || "all") === item.value
+                  ? "bg-primary-50 border-primary-300 text-primary-700"
+                  : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                }`}
+            >
+              <input
+                type="radio"
+                name="order_status"
                 value={item.value}
-                control={<Radio />}
-                label={item.label}
-                sx={{ color: "gray" }}
+                checked={(filterValue || "all") === item.value}
+                onChange={(e) => handleFilter(e, item.value)}
+                className="w-4 h-4 text-primary-600 focus:ring-primary-500"
               />
-            ))}
-          </RadioGroup>
-        </FormControl>
-      </Card>
+              {item.label}
+            </label>
+          ))}
+        </div>
+      </div>
 
-      <OrdersTable name={"All Orders"} />
+      {/* Orders Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
+        <OrdersTable name={"All Orders"} />
+      </div>
     </div>
   );
 };

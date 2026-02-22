@@ -1,8 +1,10 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Dialog } from "@headlessui/react";
+import { useDispatch } from "react-redux";
+import { addUserAddress } from "../../../state/authentication/Action";
 
 const initialValues = {
   streetAddress: "",
@@ -21,10 +23,18 @@ const validationSchema = Yup.object().shape({
 });
 
 const NewAddress = ({ open, handleClose }) => {
-  const location = useLocation();
+  const dispatch = useDispatch();
 
   const handleSubmit = (values, { resetForm }) => {
-    console.log("Submitted:", values);
+    const data = {
+      jwt: localStorage.getItem("jwt"),
+      address: {
+        ...values,
+        fullName: "User", // Ideally fetch from auth.user.fullName
+        country: "India"
+      }
+    };
+    dispatch(addUserAddress(data));
     resetForm();
     handleClose();
   };

@@ -20,6 +20,7 @@ import {
 import { fetchRestaurantsOrder } from "../state/admin/Order/restaurants.order.action";
 import RestaurantDashboard from "./Dashboard/RestaurantDashboard";
 import RestaurantsMenu from "./Food/RestaurantsMenu";
+import Coupons from "./Coupons/Coupons";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -65,6 +66,7 @@ const Admin = () => {
           <div className="max-w-[1400px] mx-auto p-4 lg:p-8">
             <Routes>
               <Route path="/" element={<RestaurantDashboard />} />
+              <Route path="/dashboard" element={<RestaurantDashboard />} />
               <Route path="/orders" element={<RestaurantsOrder />} />
               <Route path="/menu" element={<RestaurantsMenu />} />
               <Route path="/add-menu" element={<AddMenuForm />} />
@@ -72,6 +74,7 @@ const Admin = () => {
               <Route path="/event" element={<Events />} />
               <Route path="/ingredients" element={<Ingredients />} />
               <Route path="/category" element={<Category />} />
+              <Route path="/coupons" element={<Coupons />} />
               <Route path="/details" element={<Details />} />
             </Routes>
           </div>

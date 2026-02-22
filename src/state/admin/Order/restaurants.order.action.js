@@ -18,14 +18,14 @@ export const updateOrderStatus = ({ orderId, orderStatus, jwt }) => {
       dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
 
       const response = await api.put(
-        `/api/admin/orders/${orderId}/${orderStatus}`, {}, {
+        `/admin/order/${orderId}/${orderStatus}`, {}, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       }
       );
 
-      const updatedOrder = response.data;
+      const updatedOrder = response.data.data;
 
       console.log("udpdated order ", updatedOrder);
 
@@ -46,7 +46,7 @@ export const fetchRestaurantsOrder = ({ restaurantId, orderStatus, jwt }) => {
       dispatch({ type: GET_RESTAURANTS_ORDER_REQUEST });
 
       const { data } = await api.get(
-        `/api/admin/order/restaurant/${restaurantId}`, {
+        `/admin/order/restaurant/${restaurantId}`, {
         params: { order_status: orderStatus },
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -54,12 +54,13 @@ export const fetchRestaurantsOrder = ({ restaurantId, orderStatus, jwt }) => {
       }
       );
 
-      const orders = data;
+      const orders = data.data;
       console.log("restaurants order ------ ", orders);
       dispatch({
         type: GET_RESTAURANTS_ORDER_SUCCESS,
         payload: orders,
       });
+      console.log("DEBUG: Dispatched GET_RESTAURANTS_ORDER_SUCCESS with orders:", orders);
     } catch (error) {
       dispatch({ type: GET_RESTAURANTS_ORDER_FAILURE, error });
     }
@@ -72,7 +73,7 @@ export const deleteOrder = ({ orderId, jwt }) => {
     try {
       dispatch({ type: DELETE_ORDER_REQUEST });
 
-      const { data } = await api.delete(`/api/admin/order/${orderId}`, {
+      const { data } = await api.delete(`/admin/order/${orderId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

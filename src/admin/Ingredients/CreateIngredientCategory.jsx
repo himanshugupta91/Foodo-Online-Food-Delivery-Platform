@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createIngredientCategory } from '../../state/admin/Ingredients/Action';
 import { Input, Button } from '../../components/ui/Form';
 
 const CreateIngredientCategoryForm = ({ handleClose }) => {
-  const { id } = useParams();
   const dispatch = useDispatch();
-  const { auth } = useSelector(store => store);
+  const { auth, restaurant } = useSelector(store => store);
   const jwt = localStorage.getItem("jwt");
 
   const [formData, setFormData] = useState({
@@ -16,7 +14,7 @@ const CreateIngredientCategoryForm = ({ handleClose }) => {
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    const data = { name: formData.name, restaurantId: id };
+    const data = { name: formData.name, restaurantId: restaurant.usersRestaurant?.id };
     dispatch(createIngredientCategory({ jwt: auth.jwt || jwt, data }));
     setFormData({
       name: '',

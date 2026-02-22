@@ -9,11 +9,12 @@ import restaurantsOrderReducer from "../admin/Order/restaurants.order.reducer";
 import superAdminReducer from "../superAdmin/superAdmin.reducer";
 import { ingredientReducer } from "../admin/Ingredients/Reducer";
 import { reviewReducer } from "../customers/Review/review.reducer";
+import couponReducer from "../admin/Coupon/coupon.reducer";
 
 
 
 const rootReducer = combineReducers({
-
+    // customer + shared auth slices
     auth: authReducer,
     restaurant: restaurantReducer,
     menu: menuItemReducer,
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
     // admin
     restaurantsOrder: restaurantsOrderReducer,
     ingredients: ingredientReducer,
+    coupon: couponReducer,
 
     // super admin
     superAdmin: superAdminReducer,
@@ -31,4 +33,5 @@ const rootReducer = combineReducers({
     review: reviewReducer
 })
 
+// Single Redux store for the app; thunk enables async action creators.
 export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))

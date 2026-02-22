@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { createOrder } from "../../../state/customers/Orders/Action";
-import { findCart } from "../../../state/customers/Cart/cart.action";
+import { findCart, getCartTotal } from "../../../state/customers/Cart/cart.action";
 import { isValid } from "../../util/ValidToOrder";
 import { cartTotal } from "./totalPay";
 
@@ -29,6 +29,7 @@ const Cart = () => {
   const [openSnackbar, setOpenSnakbar] = useState();
   const dispatch = useDispatch();
   const { cart, auth } = useSelector((store) => store);
+  const jwt = auth.jwt || localStorage.getItem("jwt");
   const [openAddressModal, setOpenAddressModal] = useState(false);
 
   const handleCloseAddressModal = () => {
@@ -38,14 +39,23 @@ const Cart = () => {
   const handleOpenAddressModal = () => setOpenAddressModal(true);
 
   useEffect(() => {
-    dispatch(findCart(localStorage.getItem("jwt")));
-  }, [dispatch]);
+    if (jwt) {
+      dispatch(findCart(jwt));
+    }
+  }, [dispatch, jwt]);
+
+  // Fetch server-side cart total when cart is loaded
+  useEffect(() => {
+    if (cart.cart?.id && jwt) {
+      dispatch(getCartTotal({ cartId: cart.cart.id, jwt }));
+    }
+  }, [cart.cart?.id, cart.cartItems, dispatch, jwt]);
 
   const handleSubmit = (values, { resetForm }) => {
     const data = {
-      jwt: localStorage.getItem("jwt"),
+      jwt,
       order: {
-        restaurantId: cart.cartItems[0].food?.restaurant.id,
+        restaurantId: cart.cartItems?.[0]?.food?.restaurant.id,
         deliveryAddress: {
           fullName: auth.user?.fullName,
           streetAddress: values.streetAddress,
@@ -56,7 +66,7 @@ const Cart = () => {
         },
       },
     };
-    if (isValid(cart.cartItems)) {
+    if (isValid(cart.cartItems || [])) {
       dispatch(createOrder(data));
       resetForm();
       handleCloseAddressModal();
@@ -65,22 +75,28 @@ const Cart = () => {
 
   const createOrderUsingSelectedAddress = (deliveryAddress) => {
     const data = {
-      jwt: localStorage.getItem("jwt"),
+      jwt,
       order: {
-        restaurantId: cart.cartItems[0].food.restaurant.id,
+        restaurantId: cart.cartItems?.[0]?.food.restaurant.id,
         deliveryAddress,
       },
     };
-    if (isValid(cart.cartItems)) {
+    if (isValid(cart.cartItems || [])) {
       dispatch(createOrder(data));
     } else setOpenSnakbar(true);
   };
 
   const handleCloseSankBar = () => setOpenSnakbar(false);
 
+  const itemTotal = cart.cartTotal != null ? cart.cartTotal : cartTotal(cart.cartItems || []);
+  const deliveryFee = Math.round(itemTotal * 0.05);
+  const gst = Math.round(itemTotal * 0.18);
+  const platformFee = 20;
+  const totalPay = itemTotal + deliveryFee + gst + platformFee;
+
   return (
     <Fragment>
-      {cart.cartItems.length > 0 ? (
+      {cart.cartItems?.length > 0 ? (
         <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white py-8 animate-fade-in">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Page Title */}
@@ -93,7 +109,7 @@ const Cart = () => {
               <div className="lg:col-span-2 space-y-6">
                 {/* Cart Items */}
                 <div className="space-y-4">
-                  {cart.cartItems.map((item, i) => (
+                  {cart.cartItems?.map((item, i) => (
                     <CartItemCard key={i} item={item} />
                   ))}
                 </div>
@@ -106,24 +122,24 @@ const Cart = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between text-neutral-600">
                       <p>Item Total</p>
-                      <p>₹{cartTotal(cart.cartItems)}</p>
+                      <p>₹{itemTotal}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>Delivery Fee</p>
-                      <p>₹21</p>
+                      <p>₹{deliveryFee}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>Platform Fee</p>
-                      <p>₹5</p>
+                      <p>₹{platformFee}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>GST and Restaurant Charges</p>
-                      <p>₹33</p>
+                      <p>₹{gst}</p>
                     </div>
                     <div className="border-t border-neutral-200 pt-3 mt-3">
                       <div className="flex justify-between text-lg font-bold text-neutral-800">
                         <p>Total Pay</p>
-                        <p className="text-primary-600">₹{cartTotal(cart.cartItems) + 59}</p>
+                        <p className="text-primary-600">₹{totalPay}</p>
                       </div>
                     </div>
                   </div>
@@ -139,24 +155,24 @@ const Cart = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between text-neutral-600">
                       <p>Item Total</p>
-                      <p>₹{cartTotal(cart.cartItems)}</p>
+                      <p>₹{itemTotal}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>Delivery Fee</p>
-                      <p>₹21</p>
+                      <p>₹{deliveryFee}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>Platform Fee</p>
-                      <p>₹5</p>
+                      <p>₹{platformFee}</p>
                     </div>
                     <div className="flex justify-between text-neutral-600">
                       <p>GST & Charges</p>
-                      <p>₹33</p>
+                      <p>₹{gst}</p>
                     </div>
                     <div className="border-t-2 border-neutral-200 pt-4 mt-4">
                       <div className="flex justify-between text-xl font-bold text-neutral-800">
                         <p>Total Pay</p>
-                        <p className="text-primary-600">₹{cartTotal(cart.cartItems) + 59}</p>
+                        <p className="text-primary-600">₹{totalPay}</p>
                       </div>
                     </div>
                   </div>

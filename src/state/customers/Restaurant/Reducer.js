@@ -2,18 +2,25 @@
 import * as actionTypes from "./ActionTypes";
 
 const initialState = {
+  // Customer-facing collections
   restaurants: [],
+  // Owner-scoped restaurant record
   usersRestaurant: null,
+  // Currently viewed restaurant details
   restaurant: null,
   loading: false,
   error: null,
+  // Event and category data tied to restaurants
   events: [],
   restaurantsEvents: [],
   categories: [],
+  // Cached keyword search results
+  searchResults: [],
 };
 
 const restaurantReducer = (state = initialState, action) => {
   switch (action.type) {
+    // Any request starts a loading cycle and clears stale errors.
     case actionTypes.CREATE_RESTAURANT_REQUEST:
     case actionTypes.GET_ALL_RESTAURANTS_REQUEST:
     case actionTypes.DELETE_RESTAURANT_REQUEST:
@@ -21,11 +28,15 @@ const restaurantReducer = (state = initialState, action) => {
     case actionTypes.GET_RESTAURANT_BY_ID_REQUEST:
     case actionTypes.CREATE_CATEGORY_REQUEST:
     case actionTypes.GET_RESTAURANTS_CATEGORY_REQUEST:
+    case actionTypes.DELETE_CATEGORY_REQUEST:
+    case actionTypes.SEARCH_RESTAURANT_REQUEST:
+    case actionTypes.GET_RESTAURANT_BY_USER_ID_REQUEST:
       return {
         ...state,
         loading: true,
         error: null,
       };
+    // Create/update endpoints return the owner's active restaurant.
     case actionTypes.CREATE_RESTAURANT_SUCCESS:
       return {
         ...state,
@@ -44,6 +55,7 @@ const restaurantReducer = (state = initialState, action) => {
         loading: false,
         restaurant: action.payload,
       };
+    // Keep both owner record and list in sync after updates.
     case actionTypes.UPDATE_RESTAURANT_STATUS_SUCCESS:
     case actionTypes.UPDATE_RESTAURANT_SUCCESS:
       return {
@@ -62,6 +74,7 @@ const restaurantReducer = (state = initialState, action) => {
         usersRestaurant: action.payload,
       };
 
+    // Remove deleted restaurant from list and clear owner selection if it was the same one.
     case actionTypes.DELETE_RESTAURANT_SUCCESS:
       return {
         ...state,
@@ -70,9 +83,10 @@ const restaurantReducer = (state = initialState, action) => {
         restaurants: state.restaurants.filter(
           (item) => item.id !== action.payload
         ),
-        usersRestaurant: state.usersRestaurant.filter(
-          (item) => item.id !== action.payload
-        ),
+        usersRestaurant:
+          state.usersRestaurant && state.usersRestaurant.id === action.payload
+            ? null
+            : state.usersRestaurant,
       };
 
     case actionTypes.CREATE_EVENTS_SUCCESS:
@@ -115,6 +129,19 @@ const restaurantReducer = (state = initialState, action) => {
         loading: false,
         categories: action.payload,
       };
+    case actionTypes.DELETE_CATEGORY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        categories: state.categories.filter((item) => item.id !== action.payload),
+      };
+    case actionTypes.SEARCH_RESTAURANT_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        searchResults: action.payload,
+      };
+    // Failure path for all async branches in this reducer.
     case actionTypes.CREATE_RESTAURANT_FAILURE:
     case actionTypes.GET_ALL_RESTAURANTS_FAILURE:
     case actionTypes.DELETE_RESTAURANT_FAILURE:
@@ -123,6 +150,9 @@ const restaurantReducer = (state = initialState, action) => {
     case actionTypes.CREATE_EVENTS_FAILURE:
     case actionTypes.CREATE_CATEGORY_FAILURE:
     case actionTypes.GET_RESTAURANTS_CATEGORY_FAILURE:
+    case actionTypes.DELETE_CATEGORY_FAILURE:
+    case actionTypes.SEARCH_RESTAURANT_FAILURE:
+    case actionTypes.GET_RESTAURANT_BY_USER_ID_FAILURE:
       return {
         ...state,
         loading: false,

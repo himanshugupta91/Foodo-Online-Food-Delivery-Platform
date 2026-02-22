@@ -1,38 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import Grid from "@mui/material/Grid";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import CloseIcon from "@mui/icons-material/Close";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  IconButton,
-  OutlinedInput,
-  Snackbar,
-} from "@mui/material";
 import { uploadToCloudinary } from "../utils/UploadToCloudnary";
 import { createMenuItem } from "../../state/customers/Menu/menu.action";
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
+import { ArrowLeft, ImagePlus, X, CheckCircle, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -40,18 +13,13 @@ const validationSchema = Yup.object({
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
-    .min(0, "Price must be greater than or equal to 0"),
-
-  imageUrl: Yup.string()
-    .url("Invalid URL format")
-    .required("Image URL is required"),
-  vegetarian: Yup.boolean().required("Is Vegetarian is required"),
-  seasonal: Yup.boolean().required("Is Gluten Free is required"),
-  quantity: Yup.number()
-    .typeError("Quantity must be a number")
-    .required("Quantity is required")
-    .min(0, "Quantity must be greater than or equal to 0"),
+    .min(0, "Price must be positive"),
+  category: Yup.number().required("Category is required"),
+  images: Yup.array().min(1, "At least one image is required"),
+  vegetarian: Yup.boolean().required("Required"),
+  seasonal: Yup.boolean().required("Required"),
 });
+
 const initialValues = {
   name: "",
   description: "",
@@ -59,7 +27,6 @@ const initialValues = {
   category: "",
   images: [],
   restaurantId: "",
-
   vegetarian: true,
   seasonal: false,
   quantity: 0,
@@ -68,23 +35,33 @@ const initialValues = {
 
 const AddMenuForm = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { restaurant, ingredients, auth, menu } = useSelector((store) => store);
-  const [uploadImage, setUploadingImage] = useState("");
+  const [uploadImage, setUploadingImage] = useState(false);
   const jwt = localStorage.getItem("jwt");
 
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      values.restaurantId = restaurant.usersRestaurant.id;
-
-      dispatch(createMenuItem({ menu: values, jwt: auth.jwt || jwt }));
-      console.log("values ----- ", values);
+      const data = {
+        name: values.name,
+        description: values.description,
+        price: values.price,
+        categoryId: values.category,
+        images: values.images,
+        restaurantId: restaurant.usersRestaurant.id,
+        vegetarian: values.vegetarian,
+        seasonal: values.seasonal,
+        ingredientIds: values.ingredients,
+      };
+      dispatch(createMenuItem({ menu: data, jwt: auth.jwt || jwt }));
     },
   });
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
+    if (!file) return;
     setUploadingImage(true);
     const image = await uploadToCloudinary(file);
     formik.setFieldValue("images", [...formik.values.images, image]);
@@ -97,241 +74,224 @@ const AddMenuForm = () => {
     formik.setFieldValue("images", updatedImages);
   };
 
-  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    if (menu.message || menu.error) setOpenSnackBar(true);
+    if (menu.message) setToast({ type: "success", text: menu.message });
+    else if (menu.error) setToast({ type: "error", text: menu.error });
   }, [menu.message, menu.error]);
 
-  const handleCloseSnackBar = () => {
-    setOpenSnackBar(false);
-  };
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   return (
-    <>
-      <div className="lg:px-32 px-5 lg:flex  justify-center min-h-screen items-center pb-5 animate-fade-in">
-        <div>
-          <h1 className="font-bold text-2xl text-center py-2">
-            Add New Menu Item
-          </h1>
-          <form onSubmit={formik.handleSubmit} className="space-y-4 ">
-            <Grid container spacing={2}>
-              <Grid className="flex flex-wrap gap-5" item xs={12}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="fileInput"
-                  style={{ display: "none" }}
-                  onChange={handleImageChange}
-                />
-
-                <label className="relative" htmlFor="fileInput">
-                  <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600">
-                    <AddPhotoAlternateIcon className="text-white" />
-                  </span>
-                  {uploadImage && (
-                    <div className="absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center">
-                      <CircularProgress />
-                    </div>
-                  )}
-                </label>
-
-                <div className="flex flex-wrap gap-2">
-                  {formik.values.images.map((image, index) => (
-                    <div className="relative">
-                      <img
-                        className="w-24 h-24 object-cover"
-                        key={index}
-                        src={image}
-                        alt={`ProductImage ${index + 1}`}
-                      />
-                      <IconButton
-                        onClick={() => handleRemoveImage(index)}
-                        size="small"
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          right: 0,
-                          outline: "none",
-                        }}
-                      >
-                        <CloseIcon sx={{ fontSize: "1rem" }} />
-                      </IconButton>
-                    </div>
-                  ))}
-                </div>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="name"
-                  name="name"
-                  label="Name"
-                  variant="outlined"
-                  onChange={formik.handleChange}
-                  value={formik.values.name}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="description"
-                  name="description"
-                  label="Description"
-                  variant="outlined"
-                  onChange={formik.handleChange}
-                  value={formik.values.description}
-                  error={
-                    formik.touched.description &&
-                    Boolean(formik.errors.description)
-                  }
-                  helperText={
-                    formik.touched.description && formik.errors.description
-                  }
-                />
-              </Grid>
-              <Grid item xs={6} lg={3}>
-                <TextField
-                  fullWidth
-                  id="price"
-                  name="price"
-                  label="Price"
-                  variant="outlined"
-                  type="number"
-                  onChange={formik.handleChange}
-                  value={formik.values.price}
-                  error={formik.touched.price && Boolean(formik.errors.price)}
-                  helperText={formik.touched.price && formik.errors.price}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel htmlFor="categoryId">Food Category</InputLabel>
-                  <Select
-                    id="category"
-                    name="category"
-                    label="Food Category"
-                    onChange={formik.handleChange}
-                    value={formik.values.category}
-                  >
-                    {restaurant.categories.map((item) => (
-                      <MenuItem value={item}>{item.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="ingredient-multiple-chip-label">
-                    Ingredients
-                  </InputLabel>
-                  <Select
-                    labelId="ingredient-multiple-chip-label"
-                    id="ingredient-multiple-chip"
-                    multiple
-                    name="ingredients"
-                    value={formik.values.ingredients}
-                    onChange={formik.handleChange}
-                    input={
-                      <OutlinedInput
-                        id="select-multiple-chip"
-                        label="Ingrededients"
-                      />
-                    }
-                    renderValue={(selected) => (
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip key={value.id} label={value.name} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {ingredients.ingredients?.map((item) => (
-                      <MenuItem
-                        key={item.id}
-                        value={item}
-                      // style={getStyles(name, personName, theme)}
-                      >
-                        {item.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel htmlFor="vegetarian">Is Vegetarian</InputLabel>
-                  <Select
-                    id="vegetarian"
-                    name="vegetarian"
-                    label="Is Vegetarian"
-                    onChange={formik.handleChange}
-                    value={formik.values.vegetarian}
-                  >
-                    <MenuItem value={true}>Yes</MenuItem>
-                    <MenuItem value={false}>No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel htmlFor="seasonal">Is Seasonal</InputLabel>
-                  <Select
-                    id="seasonal"
-                    name="seasonal"
-                    label="Is Seasonal"
-                    onChange={formik.handleChange}
-                    value={formik.values.seasonal}
-                  >
-                    <MenuItem value={true}>Yes</MenuItem>
-                    <MenuItem value={false}>No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              {/* <Grid item xs={6}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel htmlFor="isVegan">Is Vegan</InputLabel>
-                <Select
-                  id="isVegan"
-                  name="isVegan"
-                  label="Is Vegan"
-                  onChange={formik.handleChange}
-                  value={formik.values.isVegan}
-                >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid> */}
-            </Grid>
-            <Button variant="contained" color="primary" type="submit">
-              Create Menu Item
-            </Button>
-          </form>
+    <div className="min-h-screen bg-transparent p-4 lg:p-8 animate-fade-in">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center space-x-4 mb-8">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
+            <ArrowLeft className="w-6 h-6 text-neutral-600" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Add Menu Item</h1>
+            <p className="text-gray-500 mt-1">Create a new dish for your restaurant menu</p>
+          </div>
         </div>
+
+        <form onSubmit={formik.handleSubmit} className="space-y-8">
+          {/* Image Upload Section */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Item Images</h2>
+            <div className="flex flex-wrap gap-4">
+              <input type="file" accept="image/*" id="fileInput" className="hidden" onChange={handleImageChange} />
+              <label
+                htmlFor="fileInput"
+                className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all group"
+              >
+                {uploadImage ? (
+                  <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <ImagePlus className="w-6 h-6 text-gray-400 group-hover:text-primary-500 mb-2" />
+                    <span className="text-xs font-medium text-gray-500 group-hover:text-primary-600">Add Photo</span>
+                  </>
+                )}
+              </label>
+
+              {formik.values.images.map((image, index) => (
+                <div key={index} className="relative w-32 h-32 rounded-xl overflow-hidden group shadow-md">
+                  <img src={image} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onClick={() => handleRemoveImage(index)} className="bg-white/90 hover:bg-white p-1.5 rounded-full text-red-500 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {formik.touched.images && formik.errors.images && (
+              <p className="text-red-500 text-sm mt-2">{formik.errors.images}</p>
+            )}
+          </div>
+
+          {/* Details Section */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Details</h2>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Item Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                className={`w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary-100 transition-all ${formik.touched.name && formik.errors.name ? "border-red-400" : "border-neutral-200 focus:border-primary-500"
+                  }`}
+              />
+              {formik.touched.name && formik.errors.name && <p className="text-red-500 text-xs mt-1">{formik.errors.name}</p>}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+              <textarea
+                name="description"
+                rows={3}
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                className={`w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary-100 transition-all resize-none ${formik.touched.description && formik.errors.description ? "border-red-400" : "border-neutral-200 focus:border-primary-500"
+                  }`}
+              />
+              {formik.touched.description && formik.errors.description && <p className="text-red-500 text-xs mt-1">{formik.errors.description}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Price</label>
+              <input
+                type="number"
+                name="price"
+                value={formik.values.price}
+                onChange={formik.handleChange}
+                className={`w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary-100 transition-all ${formik.touched.price && formik.errors.price ? "border-red-400" : "border-neutral-200 focus:border-primary-500"
+                  }`}
+              />
+              {formik.touched.price && formik.errors.price && <p className="text-red-500 text-xs mt-1">{formik.errors.price}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Category</label>
+              <select
+                name="category"
+                value={formik.values.category}
+                onChange={formik.handleChange}
+                className={`w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary-100 transition-all bg-white ${formik.touched.category && formik.errors.category ? "border-red-400" : "border-neutral-200 focus:border-primary-500"
+                  }`}
+              >
+                <option value="">Select Category</option>
+                {restaurant.categories?.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name}</option>
+                ))}
+              </select>
+              {formik.touched.category && formik.errors.category && <p className="text-red-500 text-xs mt-1">{String(formik.errors.category)}</p>}
+            </div>
+          </div>
+
+          {/* Configuration Section */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuration</h2>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Ingredients</label>
+              <select
+                name="ingredients"
+                multiple
+                value={formik.values.ingredients}
+                onChange={(e) => {
+                  const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
+                  formik.setFieldValue("ingredients", selected);
+                }}
+                className="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all bg-white min-h-[120px]"
+              >
+                {ingredients.ingredients?.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name}</option>
+                ))}
+              </select>
+              {formik.values.ingredients.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formik.values.ingredients.map((id) => {
+                    const name = ingredients.ingredients?.find((item) => item.id === id)?.name || id;
+                    return (
+                      <span key={id} className="inline-flex items-center gap-1 bg-primary-50 text-primary-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                        {name}
+                        <button type="button" onClick={() => formik.setFieldValue("ingredients", formik.values.ingredients.filter(v => v !== id))}>
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Is Vegetarian</label>
+              <select
+                name="vegetarian"
+                value={formik.values.vegetarian}
+                onChange={(e) => formik.setFieldValue("vegetarian", e.target.value === "true")}
+                className="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all bg-white"
+              >
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Is Seasonal</label>
+              <select
+                name="seasonal"
+                value={formik.values.seasonal}
+                onChange={(e) => formik.setFieldValue("seasonal", e.target.value === "true")}
+                className="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all bg-white"
+              >
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={menu.loading}
+            className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3.5 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {menu.loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+            ) : (
+              "Create Menu Item"
+            )}
+          </button>
+        </form>
       </div>
 
-      <Snackbar
-        sx={{ zIndex: 50 }}
-        open={openSnackBar}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackBar}
-        // handleClose={handleCloseSnackBar}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          severity={menu.error ? "error" : "success"}
-          sx={{ width: "100%" }}
-        >
-          {menu.message || auth.error}
-        </Alert>
-      </Snackbar>
-    </>
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium animate-slide-up ${toast.type === "error" ? "bg-red-500" : "bg-green-500"
+          }`}>
+          {toast.type === "error" ? <AlertCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
+          {toast.text || "Menu item created successfully!"}
+          <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

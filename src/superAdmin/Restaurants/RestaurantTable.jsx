@@ -5,8 +5,7 @@ import {
   deleteRestaurant,
   updateRestaurantStatus,
 } from "../../state/customers/Restaurant/restaurant.action";
-import { IconButton, Button } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Trash2 } from "lucide-react";
 import { Table, TableHead, TableBody, TableRow, TableCell } from "../../components/ui/Table";
 import { Card, LoadingSpinner } from "../../components/ui/Modal";
 
@@ -43,6 +42,10 @@ const RestaurantTable = ({ isDashboard, name }) => {
         {/* Table */}
         {restaurant.loading ? (
           <LoadingSpinner />
+        ) : displayedRestaurants.length === 0 ? (
+          <div className="text-center py-10 text-neutral-500">
+            <p className="text-lg font-semibold">No restaurants found.</p>
+          </div>
         ) : (
           <Table>
             <TableHead>
@@ -95,20 +98,21 @@ const RestaurantTable = ({ isDashboard, name }) => {
                   {!isDashboard && (
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          color={item.open ? "warning" : "success"}
+                        <button
                           onClick={() => handleUpdateStatus(item.id)}
+                          className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${item.open
+                              ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                              : "bg-green-100 text-green-700 hover:bg-green-200"
+                            }`}
                         >
                           {item.open ? "Close" : "Open"}
-                        </Button>
-                        <IconButton
-                          color="error"
+                        </button>
+                        <button
                           onClick={() => handleDeleteRestaurant(item.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
                         >
-                          <DeleteIcon />
-                        </IconButton>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </TableCell>
                   )}

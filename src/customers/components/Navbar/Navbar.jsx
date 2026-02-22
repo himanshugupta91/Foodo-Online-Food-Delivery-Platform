@@ -2,16 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../state/authentication/Action";
-import { ShoppingCart, User, Menu, X, Search, Heart, Package, LogOut, ChevronDown, Home, Compass } from "lucide-react";
+import { getUsersNotificationAction } from "../../../state/customers/Orders/Action";
+import { ShoppingCart, User, Menu, X, Search, Heart, Package, LogOut, ChevronDown, Home, Compass, Bell } from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { auth, cart } = useSelector((store) => store);
+  const { auth, cart, order, restaurant } = useSelector((store) => store);
   const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   useEffect(() => {
@@ -21,6 +23,13 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Fetch notifications on mount for non-SuperAdmin users
+  useEffect(() => {
+    if (auth.user && auth.user.role !== "ROLE_SUPER_ADMIN") {
+      dispatch(getUsersNotificationAction());
+    }
+  }, [auth.user, dispatch]);
 
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -45,7 +54,6 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     handleCloseMenu();
-    navigate("/");
   };
 
   return (
@@ -89,6 +97,13 @@ const Navbar = () => {
               <Home className="w-5 h-5" />
               Home
             </button>
+            <button
+              onClick={() => navigate("/events")}
+              className="flex items-center gap-2 text-neutral-600 hover:text-primary-600 font-medium transition-colors"
+            >
+              <Compass className="w-5 h-5" />
+              Events
+            </button>
 
             <button
               onClick={() => navigate("/restaurants")}
@@ -98,7 +113,7 @@ const Navbar = () => {
               Restaurants
             </button>
 
-            {auth.user && (
+            {auth.user && auth.user.role === "ROLE_CUSTOMER" && (
               <button
                 onClick={() => navigate("/my-profile/favorites")}
                 className="flex items-center gap-2 text-neutral-600 hover:text-primary-600 font-medium transition-colors"
@@ -108,18 +123,60 @@ const Navbar = () => {
               </button>
             )}
 
+            {/* Notifications Bell */}
+            {auth.user && auth.user.role !== "ROLE_SUPER_ADMIN" && (
+              <div className="relative">
+                <button
+                  onClick={() => setNotifOpen(!notifOpen)}
+                  className="relative p-2 rounded-full hover:bg-neutral-100 text-neutral-600 hover:text-primary-600 transition-all"
+                >
+                  <Bell className="w-5 h-5" />
+                  {order.notifications?.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                      {order.notifications.length > 9 ? "9+" : order.notifications.length}
+                    </span>
+                  )}
+                </button>
+                {notifOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl py-2 z-30 border border-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200 max-h-96 overflow-y-auto">
+                    <div className="px-5 py-3 border-b border-neutral-100">
+                      <p className="font-semibold text-neutral-900">Notifications</p>
+                    </div>
+                    {order.notifications?.length > 0 ? (
+                      order.notifications.slice(0, 10).map((notif, i) => (
+                        <div key={i} className="px-5 py-3 hover:bg-neutral-50 transition-colors border-b border-neutral-50 last:border-0">
+                          <p className="text-sm text-neutral-700">{notif.message || notif}</p>
+                          {notif.dateTime && (
+                            <p className="text-xs text-neutral-400 mt-1">
+                              {new Date(notif.dateTime).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-5 py-6 text-center text-neutral-400 text-sm">
+                        No notifications yet
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Cart */}
-            <button
-              onClick={navigateToCart}
-              className="relative p-2 rounded-full hover:bg-neutral-100 text-neutral-600 hover:text-primary-600 transition-all"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {cart.cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  {cart.cartItems.length}
-                </span>
-              )}
-            </button>
+            {auth.user?.role === "ROLE_CUSTOMER" && (
+              <button
+                onClick={navigateToCart}
+                className="relative p-2 rounded-full hover:bg-neutral-100 text-neutral-600 hover:text-primary-600 transition-all"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {cart.cartItems?.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                    {cart.cartItems?.length}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* User Menu */}
             {auth.user?.fullName ? (
@@ -164,7 +221,7 @@ const Navbar = () => {
                           <span className="w-4 h-4 text-center">⚡</span> Super Admin
                         </button>
                       )}
-                      {(auth.user.role === "ROLE_ADMIN" || auth.user.role === "ROLE_RESTAURANT_OWNER") && (
+                      {auth.user.role === "ROLE_RESTAURANT_OWNER" && (
                         <button
                           onClick={() => {
                             navigate("/admin/restaurant");
@@ -172,27 +229,34 @@ const Navbar = () => {
                           }}
                           className="w-full text-left px-5 py-2.5 hover:bg-primary-50 transition-colors text-neutral-600 hover:text-primary-600 flex items-center gap-3 font-semibold text-primary-600"
                         >
-                          <span className="w-4 h-4 text-center">🏪</span> Restaurant Dashboard
+                          <span className="w-4 h-4 text-center">🏪</span>
+                          {!restaurant.usersRestaurant ? "Add Restaurant" : "Restaurant Dashboard"}
                         </button>
                       )}
-                      <button
-                        onClick={() => {
-                          navigateToProfile();
-                          handleCloseMenu();
-                        }}
-                        className="w-full text-left px-5 py-2.5 hover:bg-primary-50 transition-colors text-neutral-600 hover:text-primary-600 flex items-center gap-3"
-                      >
-                        <User className="w-4 h-4" /> Profile
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigate("/my-profile/orders");
-                          handleCloseMenu();
-                        }}
-                        className="w-full text-left px-5 py-2.5 hover:bg-primary-50 transition-colors text-neutral-600 hover:text-primary-600 flex items-center gap-3"
-                      >
-                        <Package className="w-4 h-4" /> Orders
-                      </button>
+                      {auth.user.role !== "ROLE_SUPER_ADMIN" && (
+                        <>
+                          <button
+                            onClick={() => {
+                              navigateToProfile();
+                              handleCloseMenu();
+                            }}
+                            className="w-full text-left px-5 py-2.5 hover:bg-primary-50 transition-colors text-neutral-600 hover:text-primary-600 flex items-center gap-3"
+                          >
+                            <User className="w-4 h-4" /> Profile
+                          </button>
+                          {auth.user.role === "ROLE_CUSTOMER" && (
+                            <button
+                              onClick={() => {
+                                navigate("/my-profile/orders");
+                                handleCloseMenu();
+                              }}
+                              className="w-full text-left px-5 py-2.5 hover:bg-primary-50 transition-colors text-neutral-600 hover:text-primary-600 flex items-center gap-3"
+                            >
+                              <Package className="w-4 h-4" /> Orders
+                            </button>
+                          )}
+                        </>
+                      )}
                       <div className="border-t border-neutral-50 mt-1 pt-1">
                         <button
                           onClick={handleLogout}
@@ -238,6 +302,15 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => {
+                navigate("/events");
+                setMobileMenuOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
+            >
+              <span className="w-5 flex justify-center"><Compass className="w-4 h-4" /></span> Events
+            </button>
+            <button
+              onClick={() => {
                 navigate("/search");
                 setMobileMenuOpen(false);
               }}
@@ -258,7 +331,7 @@ const Navbar = () => {
                     <span className="w-5 flex justify-center">⚡</span> Super Admin
                   </button>
                 )}
-                {(auth.user.role === "ROLE_ADMIN" || auth.user.role === "ROLE_RESTAURANT_OWNER") && (
+                {auth.user.role === "ROLE_RESTAURANT_OWNER" && (
                   <button
                     onClick={() => {
                       navigate("/admin/restaurant");
@@ -266,36 +339,57 @@ const Navbar = () => {
                     }}
                     className="block w-full text-left px-4 py-2 rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 flex items-center gap-3 font-semibold"
                   >
-                    <span className="w-5 flex justify-center">🏪</span> Restaurant Dashboard
+                    <span className="w-5 flex justify-center">🏪</span>
+                    {!restaurant.usersRestaurant ? "Add Restaurant" : "Restaurant Dashboard"}
                   </button>
                 )}
-                <button
-                  onClick={() => {
-                    navigate("/my-profile/favorites");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
-                >
-                  <span className="w-5 flex justify-center"><Heart className="w-4 h-4" /></span> Favorites
-                </button>
-                <button
-                  onClick={() => {
-                    navigateToCart();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
-                >
-                  <span className="w-5 flex justify-center"><ShoppingCart className="w-4 h-4" /></span> Cart ({cart.cartItems.length})
-                </button>
-                <button
-                  onClick={() => {
-                    navigateToProfile();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
-                >
-                  <span className="w-5 flex justify-center"><User className="w-4 h-4" /></span> Profile
-                </button>
+                {auth.user.role !== "ROLE_SUPER_ADMIN" && (
+                  <button
+                    onClick={() => {
+                      setNotifOpen(!notifOpen);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
+                  >
+                    <span className="w-5 flex justify-center"><Bell className="w-4 h-4" /></span> Notifications
+                    {order.notifications?.length > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                        {order.notifications.length}
+                      </span>
+                    )}
+                  </button>
+                )}
+                {auth.user.role === "ROLE_CUSTOMER" && (
+                  <>
+                    <button
+                      onClick={() => {
+                        navigate("/my-profile/favorites");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
+                    >
+                      <span className="w-5 flex justify-center"><Heart className="w-4 h-4" /></span> Favorites
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigateToCart();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
+                    >
+                      <span className="w-5 flex justify-center"><ShoppingCart className="w-4 h-4" /></span> Cart ({cart.cartItems?.length || 0})
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigateToProfile();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 flex items-center gap-3"
+                    >
+                      <span className="w-5 flex justify-center"><User className="w-4 h-4" /></span> Profile
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => {
                     handleLogout();

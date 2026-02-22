@@ -15,16 +15,24 @@ import {
   UPDATE_RESTAURANT_STATUS_REQUEST,
   UPDATE_RESTAURANT_STATUS_SUCCESS,
   UPDATE_RESTAURANT_STATUS_FAILURE,
+  DELETE_CUSTOMER_REQUEST,
+  DELETE_CUSTOMER_SUCCESS,
+  DELETE_CUSTOMER_FAILURE,
 } from "./superAdmin.actionType";
 
 export const getCustomers = () => {
   return async (dispatch) => {
     dispatch({ type: GET_CUSTOMERS_REQUEST });
     try {
-      const { data } = await api.get("api/customers");
-      dispatch({ type: GET_CUSTOMERS_SUCCESS, payload: data });
-      console.log("created restaurant ", data);
+      const { data } = await api.get("/super-admin/customers", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      dispatch({ type: GET_CUSTOMERS_SUCCESS, payload: data.data });
+      console.log("get all customers ", data);
     } catch (error) {
+      console.log("catch error ", error);
       dispatch({ type: GET_CUSTOMERS_FAILURE, error: error.message });
     }
   };
@@ -34,10 +42,15 @@ export const getPendingCustomers = () => {
   return async (dispatch) => {
     dispatch({ type: GET_PENDING_CUSTOMERS_REQUEST });
     try {
-      const { data } = await api.get("api/pending-customers");
-      dispatch({ type: GET_PENDING_CUSTOMERS_SUCCESS, payload: data });
-      console.log("created restaurant ", data);
+      const { data } = await api.get("/super-admin/pending-customers", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      dispatch({ type: GET_PENDING_CUSTOMERS_SUCCESS, payload: data.data });
+      console.log("pending customers ", data);
     } catch (error) {
+      console.log("catch error ", error);
       dispatch({ type: GET_PENDING_CUSTOMERS_FAILURE, error: error.message });
     }
   };
@@ -47,16 +60,17 @@ export const getPendingRestaurants = () => {
   return async (dispatch) => {
     dispatch({ type: GET_PENDING_RESTAURANTS_REQUEST });
     try {
-      const { data } = await api.get("/api/admin/restaurants?status=PENDING"); // Assumption: Backend supports filtering by status or it's a specific endpoint
-      // If the backend doesn't support query params for status on /api/admin/restaurants, we might need a specific endpoint like /api/admin/restaurants/pending
-      // Let's assume the standard RESTful filter Pattern or check if there's an existing pattern. 
-      // Based on typical spring boot, maybe just get all and filter? But let's try to hit an endpoint that likely exists or use the general get.
-      // Actually, let's use the same endpoint as getAllRestaurants but look for a param, or if I recall getAllRestaurants was just /api/restaurants. 
-      // Ideally, super admin should have a route. Let's try /api/admin/restaurants with status.
-      dispatch({ type: GET_PENDING_RESTAURANTS_SUCCESS, payload: data });
-      console.log("pending restaurants ", data);
+      const { data } = await api.get("/super-admin/restaurants", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      console.log("all restaurants for pending check ", data);
+      const allRestaurants = data.data?.content || data.data || [];
+      const pendingRestaurants = allRestaurants.filter(item => !item.open);
+      dispatch({ type: GET_PENDING_RESTAURANTS_SUCCESS, payload: pendingRestaurants });
+      console.log("pending restaurants filtered ", pendingRestaurants);
     } catch (error) {
-      // Fallback or error handling
       console.log("Error fetching pending restaurants", error);
       dispatch({ type: GET_PENDING_RESTAURANTS_FAILURE, error: error.message });
     }
@@ -67,7 +81,7 @@ export const deleteRestaurant = (restaurantId) => {
   return async (dispatch) => {
     dispatch({ type: DELETE_RESTAURANT_REQUEST });
     try {
-      await api.delete(`/api/admin/restaurants/${restaurantId}`);
+      await api.delete(`/super-admin/restaurants/${restaurantId}`);
       dispatch({ type: DELETE_RESTAURANT_SUCCESS, payload: restaurantId });
       console.log("deleted restaurant ", restaurantId);
     } catch (error) {
@@ -82,17 +96,31 @@ export const updateRestaurantStatus = ({ restaurantId, status }) => {
     dispatch({ type: UPDATE_RESTAURANT_STATUS_REQUEST });
     try {
       const response = await api.put(
-        `/api/admin/restaurants/${restaurantId}/status`,
+        `/super-admin/restaurants/${restaurantId}/status`,
         {},
       );
       console.log("update restaurant status ", response.data);
       dispatch({
         type: UPDATE_RESTAURANT_STATUS_SUCCESS,
-        payload: response.data
+        payload: response.data.data
       });
     } catch (error) {
       console.log("error ", error);
       dispatch({ type: UPDATE_RESTAURANT_STATUS_FAILURE, error: error.message });
+    }
+  };
+};
+
+export const deleteCustomer = (email) => {
+  return async (dispatch) => {
+    dispatch({ type: DELETE_CUSTOMER_REQUEST });
+    try {
+      await api.delete(`/super-admin/customers/${email}`);
+      dispatch({ type: DELETE_CUSTOMER_SUCCESS, payload: email });
+      console.log("deleted customer ", email);
+    } catch (error) {
+      console.log("Error deleting customer", error);
+      dispatch({ type: DELETE_CUSTOMER_FAILURE, error: error.message });
     }
   };
 };

@@ -1,43 +1,29 @@
 import React from "react";
-import StarIcon from "@mui/icons-material/Star";
-import StarHalfIcon from "@mui/icons-material/StarHalf";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { Star } from "lucide-react";
 
 const StarRating = ({ rating, handleRating, isReadOnly = false }) => {
-    const stars = [];
-
-    for (let i = 1; i <= 5; i++) {
-        if (rating >= i) {
-            stars.push(
-                <StarIcon
+    return (
+        <div className="flex items-center space-x-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+                <button
                     key={i}
-                    className={`text-yellow-400 ${!isReadOnly ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
-                    onClick={() => !isReadOnly && handleRating(i)}
-                    sx={{ fontSize: "20px", color: "#fcd34d" }}
-                />
-            );
-        } else if (rating >= i - 0.5) {
-            stars.push(
-                <StarHalfIcon
-                    key={i}
-                    className={`text-yellow-400 ${!isReadOnly ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
-                    onClick={() => !isReadOnly && handleRating(i)}
-                    sx={{ fontSize: "20px", color: "#fcd34d" }}
-                />
-            );
-        } else {
-            stars.push(
-                <StarBorderIcon
-                    key={i}
-                    className={`text-gray-300 ${!isReadOnly ? "cursor-pointer hover:text-yellow-400 transition-colors" : ""}`}
-                    onClick={() => !isReadOnly && handleRating(i)}
-                    sx={{ fontSize: "20px", color: "#d1d5db" }}
-                />
-            );
-        }
-    }
-
-    return <div className="flex items-center space-x-1">{stars}</div>;
+                    type="button"
+                    onClick={() => !isReadOnly && handleRating?.(i)}
+                    className={`${!isReadOnly ? "cursor-pointer hover:scale-110 transition-transform" : "cursor-default"}`}
+                    disabled={isReadOnly}
+                >
+                    <Star
+                        className={`w-5 h-5 ${rating >= i
+                                ? "text-amber-400 fill-amber-400"
+                                : rating >= i - 0.5
+                                    ? "text-amber-400 fill-amber-400"
+                                    : "text-neutral-300"
+                            }`}
+                    />
+                </button>
+            ))}
+        </div>
+    );
 };
 
 export default StarRating;

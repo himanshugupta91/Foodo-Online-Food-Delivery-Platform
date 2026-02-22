@@ -1,13 +1,14 @@
 import React, { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../state/authentication/Action";
-import { LayoutDashboard, ShoppingBag, Utensils, Folder, Salad, Calendar, Settings, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Utensils, Folder, Salad, Calendar, Settings, LogOut, Home, Ticket } from "lucide-react";
 
 export default function AdminSidebar({ handleClose, open }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+  const { restaurant } = useSelector((store) => store);
 
   const menu = useMemo(() => [
     { title: "Home", icon: <Home className="w-5 h-5" />, path: "/" },
@@ -17,13 +18,13 @@ export default function AdminSidebar({ handleClose, open }) {
     { title: "Food Category", icon: <Folder className="w-5 h-5" />, path: "/category" },
     { title: "Ingredients", icon: <Salad className="w-5 h-5" />, path: "/ingredients" },
     { title: "Events", icon: <Calendar className="w-5 h-5" />, path: "/event" },
+    { title: "Coupons", icon: <Ticket className="w-5 h-5" />, path: "/coupons" },
     { title: "Details", icon: <Settings className="w-5 h-5" />, path: "/details" },
     { title: "Logout", icon: <LogOut className="w-5 h-5" />, path: "/" },
   ], []);
 
   const handleNavigate = (item) => {
     if (item.title === "Logout") {
-      navigate("/");
       dispatch(logout());
       handleClose();
       return;
@@ -72,7 +73,7 @@ export default function AdminSidebar({ handleClose, open }) {
                 <h2 className="font-display text-lg font-bold text-white tracking-wide">
                   Admin Panel
                 </h2>
-                <p className="text-xs text-neutral-500">Restaurant Management</p>
+                <p className="text-xs text-neutral-500">{restaurant.usersRestaurant?.name || "Restaurant Management"}</p>
               </div>
             </div>
           </div>
