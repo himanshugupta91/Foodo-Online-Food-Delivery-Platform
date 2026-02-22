@@ -1,0 +1,29 @@
+
+server.port=your_value_here
+
+#db specific properties
+spring.datasource.url=your_value_here
+//spring.datasource.driver-class-name=your_value_here
+spring.datasource.username=your_value_here
+spring.datasource.password=your_value_here
+
+
+#ORM s/w specific properties
+spring.jpa.hibernate.ddl-auto=your_value_here
+spring.jpa.show-sql=your_value_here
+
+
+stripe.api.key=your_value_here
+
+spring.mail.host=your_value_here
+spring.mail.port=your_value_here
+spring.mail.username=your_value_here
+spring.mail.password=your_value_here
+spring.mail.properties.mail.smtp.auth=your_value_here
+spring.mail.properties.mail.smtp.starttls.enable=your_value_here
+
+
+spring.jackson.serialization.write-dates-as-timestamps=your_value_here
+
+
+
