@@ -77,18 +77,6 @@ Foodo is a multi-role, full-stack food delivery platform that enables **customer
 | **Spring Mail** | Email notifications (password reset) |
 | **Maven** | Build tool |
 
-### Frontend
-| Technology | Purpose |
-|---|---|
-| **React 18** | UI library |
-| **Redux + Redux Thunk** | State management |
-| **Tailwind CSS 3** | Utility-first styling |
-| **React Router DOM 6** | Client-side routing |
-| **Axios** | HTTP client with interceptors & refresh token |
-| **Formik + Yup** | Form handling & validation |
-| **Lucide React** | Icon library |
-| **React Slick** | Carousel/slider components |
-
 ---
 
 <div align="center">
