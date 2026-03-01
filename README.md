@@ -91,12 +91,6 @@ Foodo is a multi-role, full-stack food delivery platform that enables **customer
 
 ---
 
-## � License
-
-This project is for educational and portfolio purposes.
-
----
-
 <div align="center">
   <b>⭐ Star this repo if you found it useful! ⭐</b>
 </div>
