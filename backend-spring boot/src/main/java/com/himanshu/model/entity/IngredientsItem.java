@@ -28,7 +28,7 @@ public class IngredientsItem {
 
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
-	@jakarta.persistence.JoinColumn(name = "restaurant_id") // Explicit join column is better
+	@jakarta.persistence.JoinColumn(name = "restaurant_id")
 	private Restaurant restaurant;
 
 	@Builder.Default

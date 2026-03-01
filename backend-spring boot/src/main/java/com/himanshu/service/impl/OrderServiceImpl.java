@@ -55,7 +55,6 @@ public class OrderServiceImpl implements OrderService {
 	private final com.himanshu.repository.CouponRepository couponRepository;
 	private final UserMapper userMapper;
 
-
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public PaymentResponse createOrder(CreateOrderRequest orderRequest, User user)
@@ -84,7 +83,6 @@ public class OrderServiceImpl implements OrderService {
 		List<OrderItem> orderItems = createOrderItems(cart);
 		Long totalPrice = calculateTotal(orderItems);
 
-		// Batch save all order items
 		List<OrderItem> savedOrderItems = orderItemRepository.saveAll(orderItems);
 		createdOrder.setItems(savedOrderItems);
 		createdOrder.setTotalAmount(totalPrice);
@@ -112,7 +110,6 @@ public class OrderServiceImpl implements OrderService {
 			Order order = findOrderById(orderId);
 			order.setOrderStatus(OrderStatus.RECEIVED.name());
 
-			// Clear the user's cart
 			try {
 				cartService.clearCart(order.getCustomer().getId());
 			} catch (Exception e) {
@@ -161,7 +158,6 @@ public class OrderServiceImpl implements OrderService {
 					order.setDiscount(discount);
 					order.setTotalAmount(totalPrice - discount);
 
-					// Mark coupon as used
 					order.getCustomer().getUsedCoupons().add(coupon);
 				}
 			}

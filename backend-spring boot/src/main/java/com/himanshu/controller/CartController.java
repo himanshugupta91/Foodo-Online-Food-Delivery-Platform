@@ -41,19 +41,6 @@ public class CartController {
 	private final UserService userService;
 	private final CartMapper cartMapper;
 
-
-
-	/**
-	 * Add an item to the user's cart.
-	 *
-	 * @param req The add item request.
-	 * @param jwt The JWT token of the user.
-	 * @return The updated cart item.
-	 * @throws UserException     If user not found.
-	 * @throws FoodException     If food not found.
-	 * @throws CartException     If cart not found.
-	 * @throws CartItemException If cart item error.
-	 */
 	@PutMapping("/cart/add")
 	public ResponseEntity<ApiResponse<CartItemDto>> addItemToCart(@Valid @RequestBody AddCartItemRequest req,
 			@RequestHeader("Authorization") String jwt)
@@ -64,14 +51,6 @@ public class CartController {
 
 	}
 
-	/**
-	 * Update the quantity of a cart item.
-	 *
-	 * @param req The update request.
-	 * @param jwt The JWT token of the user.
-	 * @return The updated cart item.
-	 * @throws CartItemException If cart item not found.
-	 */
 	@PutMapping("/cart-item/update")
 	public ResponseEntity<ApiResponse<CartItemDto>> updateCartItemQuantity(
 			@Valid @RequestBody UpdateCartItemRequest req,
@@ -81,16 +60,6 @@ public class CartController {
 		return ResponseEntity.ok(ApiResponse.success(cartItemDto, "Cart item updated"));
 	}
 
-	/**
-	 * Remove an item from the cart.
-	 *
-	 * @param id  The cart item ID.
-	 * @param jwt The JWT token of the user.
-	 * @return The updated cart.
-	 * @throws UserException     If user not found.
-	 * @throws CartException     If cart not found.
-	 * @throws CartItemException If cart item not found.
-	 */
 	@DeleteMapping("/cart-item/{id}/remove")
 	public ResponseEntity<ApiResponse<CartDto>> removeItemFromCart(@PathVariable Long id,
 			@RequestHeader("Authorization") String jwt) throws UserException, CartException, CartItemException {
@@ -101,15 +70,6 @@ public class CartController {
 
 	}
 
-	/**
-	 * Calculate cart totals.
-	 *
-	 * @param cartId The cart ID.
-	 * @param jwt    The JWT token of the user.
-	 * @return The total price.
-	 * @throws UserException If user not found.
-	 * @throws CartException If cart not found.
-	 */
 	@GetMapping("/cart/total")
 	public ResponseEntity<ApiResponse<Double>> calculateCartTotals(@RequestParam Long cartId,
 			@RequestHeader("Authorization") String jwt) throws UserException, CartException {
@@ -121,14 +81,6 @@ public class CartController {
 		return ResponseEntity.ok(ApiResponse.success(total, "Cart total"));
 	}
 
-	/**
-	 * Find the user's cart.
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return The user's cart.
-	 * @throws UserException If user not found.
-	 * @throws CartException If cart not found.
-	 */
 	@GetMapping("/cart/")
 	public ResponseEntity<ApiResponse<CartDto>> getUserCart(
 			@RequestHeader("Authorization") String jwt) throws UserException, CartException {
@@ -138,14 +90,6 @@ public class CartController {
 		return ResponseEntity.ok(ApiResponse.success(cartDto, "User cart"));
 	}
 
-	/**
-	 * Clear the user's cart.
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return The cleared cart.
-	 * @throws UserException If user not found.
-	 * @throws CartException If cart not found.
-	 */
 	@PutMapping("/cart/clear")
 	public ResponseEntity<ApiResponse<CartDto>> clearCart(
 			@RequestHeader("Authorization") String jwt) throws UserException, CartException {
@@ -155,15 +99,6 @@ public class CartController {
 		return ResponseEntity.ok(ApiResponse.success(cartDto, "Cart cleared"));
 	}
 
-	/**
-	 * Get all items in a cart.
-	 *
-	 * @param cartId The cart ID.
-	 * @param jwt    The JWT token of the user.
-	 * @return List of cart items.
-	 * @throws UserException If user not found.
-	 * @throws CartException If cart not found.
-	 */
 	@GetMapping("/carts/{cartId}/items")
 	public ResponseEntity<ApiResponse<List<CartItemDto>>> getCartItems(
 			@PathVariable Long cartId,

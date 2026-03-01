@@ -26,14 +26,6 @@ public class IngredientsController {
 	private final IngredientsService ingredientService;
 	private final IngredientMapper ingredientMapper;
 
-
-	/**
-	 * Create a new ingredient category.
-	 *
-	 * @param req The creation request.
-	 * @return The created category.
-	 * @throws Exception If creation fails.
-	 */
 	@PostMapping("/category")
 	public ResponseEntity<ApiResponse<IngredientCategoryDto>> createIngredientCategory(
 			@Valid @RequestBody CreateIngredientCategoryRequest req) throws Exception {
@@ -42,13 +34,6 @@ public class IngredientsController {
 		return ResponseEntity.ok(ApiResponse.success(dto, "Ingredient category created"));
 	}
 
-	/**
-	 * Create a new ingredient item.
-	 *
-	 * @param req The creation request.
-	 * @return The created ingredient.
-	 * @throws Exception If creation fails.
-	 */
 	@PostMapping()
 	public ResponseEntity<ApiResponse<IngredientsItemDto>> createIngredient(
 			@Valid @RequestBody CreateIngredientRequest req) throws Exception {
@@ -59,13 +44,6 @@ public class IngredientsController {
 		return ResponseEntity.ok(ApiResponse.success(dto, "Ingredient created"));
 	}
 
-	/**
-	 * Update ingredient stock status.
-	 *
-	 * @param id The ingredient ID.
-	 * @return The updated ingredient.
-	 * @throws Exception If not found.
-	 */
 	@PutMapping("/{id}/stock")
 	public ResponseEntity<ApiResponse<IngredientsItemDto>> updateStock(@PathVariable Long id) throws Exception {
 		IngredientsItem item = ingredientService.updateStock(id);
@@ -73,13 +51,6 @@ public class IngredientsController {
 		return ResponseEntity.ok(ApiResponse.success(dto, "Stock updated"));
 	}
 
-	/**
-	 * Get ingredients of a restaurant.
-	 *
-	 * @param id The restaurant ID.
-	 * @return List of ingredients.
-	 * @throws Exception If not found.
-	 */
 	@GetMapping("/restaurant/{id}")
 	public ResponseEntity<ApiResponse<List<IngredientsItemDto>>> restaurantsIngredient(
 			@PathVariable Long id) throws Exception {
@@ -88,13 +59,6 @@ public class IngredientsController {
 		return ResponseEntity.ok(ApiResponse.success(dtos, "Restaurant ingredients"));
 	}
 
-	/**
-	 * Get ingredient categories of a restaurant.
-	 *
-	 * @param id The restaurant ID.
-	 * @return List of ingredient categories.
-	 * @throws Exception If not found.
-	 */
 	@GetMapping("/restaurant/{id}/category")
 	public ResponseEntity<ApiResponse<List<IngredientCategoryDto>>> restaurantsIngredientCategory(
 			@PathVariable Long id) throws Exception {
@@ -103,26 +67,12 @@ public class IngredientsController {
 		return ResponseEntity.ok(ApiResponse.success(dtos, "Restaurant ingredient categories"));
 	}
 
-	/**
-	 * Delete an ingredient item.
-	 *
-	 * @param id The ingredient ID.
-	 * @return Success response.
-	 * @throws Exception If not found.
-	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteIngredient(@PathVariable Long id) throws Exception {
 		ingredientService.deleteIngredientsItem(id);
 		return ResponseEntity.ok(ApiResponse.success("Ingredient deleted successfully", null));
 	}
 
-	/**
-	 * Delete an ingredient category.
-	 *
-	 * @param id The ingredient category ID.
-	 * @return Success response.
-	 * @throws Exception If not found.
-	 */
 	@DeleteMapping("/category/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteIngredientCategory(@PathVariable Long id) throws Exception {
 		ingredientService.deleteIngredientCategory(id);

@@ -34,16 +34,6 @@ public class ReviewController {
 	private final UserService userService;
 	private final ReviewMapper reviewMapper;
 
-
-
-	/**
-	 * Create a new review.
-	 *
-	 * @param review The review request.
-	 * @param jwt    The JWT token of the user.
-	 * @return The created review.
-	 * @throws UserException If user not found.
-	 */
 	@PostMapping("/review")
 	public ResponseEntity<ApiResponse<ReviewDto>> createReview(
 			@Valid @RequestBody ReviewRequest review,
@@ -54,25 +44,12 @@ public class ReviewController {
 		return ResponseEntity.ok(ApiResponse.success(reviewDto, "Review submitted successfully"));
 	}
 
-	/**
-	 * Delete a review.
-	 *
-	 * @param reviewId The review ID.
-	 * @return Success message.
-	 * @throws ReviewException If review not found.
-	 */
 	@DeleteMapping("/review/{reviewId}")
 	public ResponseEntity<ApiResponse<String>> deleteReview(@PathVariable Long reviewId) throws ReviewException {
 		reviewService.deleteReview(reviewId);
 		return ResponseEntity.ok(ApiResponse.success("Review deleted successfully", "Review deleted"));
 	}
 
-	/**
-	 * Calculate average rating for a restaurant.
-	 *
-	 * @param restaurantId The restaurant ID.
-	 * @return The average rating.
-	 */
 	@GetMapping("/review/restaurant/{restaurantId}/average-rating")
 	public ResponseEntity<ApiResponse<Double>> calculateAverageRating(@PathVariable Long restaurantId) {
 		List<Review> reviews = reviewService.getReviewsByRestaurant(restaurantId);
@@ -80,12 +57,6 @@ public class ReviewController {
 		return ResponseEntity.ok(ApiResponse.success(averageRating, "Average rating"));
 	}
 
-	/**
-	 * Get reviews by restaurant ID.
-	 *
-	 * @param restaurantId The restaurant ID.
-	 * @return List of reviews.
-	 */
 	@GetMapping("/review/restaurant/{restaurantId}")
 	public ResponseEntity<ApiResponse<List<ReviewDto>>> getRestaurantReviews(@PathVariable Long restaurantId) {
 		List<Review> reviews = reviewService.getReviewsByRestaurant(restaurantId);

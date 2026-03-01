@@ -29,12 +29,6 @@ public class AdminCouponController {
 
     private final CouponService couponService;
 
-    /**
-     * Create a new coupon.
-     *
-     * @param couponDto The coupon details.
-     * @return The created coupon.
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<CouponDto>> createCoupon(@Valid @RequestBody CreateCouponRequest request)
             throws CouponException {
@@ -42,35 +36,18 @@ public class AdminCouponController {
         return ResponseEntity.ok(ApiResponse.success(createdCoupon, "Coupon created successfully"));
     }
 
-    /**
-     * Get all coupons.
-     *
-     * @return List of all coupons.
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<List<CouponDto>>> getAllCoupons() {
         List<CouponDto> couponDtos = couponService.getAllCoupons();
         return ResponseEntity.ok(ApiResponse.success(couponDtos, "Coupons retrieved successfully"));
     }
 
-    /**
-     * Delete a coupon by ID.
-     *
-     * @param id The coupon ID.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteCoupon(@PathVariable Long id) throws CouponException {
         couponService.deleteCouponById(id);
         return ResponseEntity.ok(ApiResponse.success("Success", "Coupon deleted successfully"));
     }
 
-    /**
-     * Update a coupon by ID.
-     *
-     * @param id        The coupon ID.
-     * @param couponDto The coupon details.
-     * @return The updated coupon.
-     */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CouponDto>> updateCoupon(@PathVariable Long id,
             @Valid @RequestBody UpdateCouponRequest request) throws CouponException {

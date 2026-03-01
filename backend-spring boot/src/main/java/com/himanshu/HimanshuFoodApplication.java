@@ -17,10 +17,10 @@ public class HimanshuFoodApplication {
 	public CommandLineRunner run(JdbcTemplate jdbcTemplate) {
 		return args -> {
 			try {
-				// Startup compatibility fix for old schema snapshots that still carry this check.
+
 				jdbcTemplate.execute("ALTER TABLE user DROP CHECK user_chk_1");
 			} catch (Exception e) {
-				// Constraint might not exist, ignoring.
+
 			}
 		};
 	}

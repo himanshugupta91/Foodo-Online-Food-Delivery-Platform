@@ -29,11 +29,6 @@ public class SuperAdminController {
 	private final RestaurantService restaurantService;
 	private final RestaurantMapper restaurantMapper;
 
-	// ── User Management ──────────────────────────────────────────────
-
-	/**
-	 * Get all customers.
-	 */
 	@GetMapping("/customers")
 	public ResponseEntity<ApiResponse<List<UserDto>>> getAllCustomers() {
 		List<User> users = userService.findAllUsers();
@@ -41,9 +36,6 @@ public class SuperAdminController {
 		return ResponseEntity.ok(ApiResponse.success(userDtos, "All customers"));
 	}
 
-	/**
-	 * Get pending restaurant owner requests.
-	 */
 	@GetMapping("/pending-customers")
 	public ResponseEntity<ApiResponse<List<UserDto>>> getPendingRestaurantOwners() {
 		List<User> users = userService.getPendingRestaurantOwner();
@@ -51,9 +43,6 @@ public class SuperAdminController {
 		return ResponseEntity.ok(ApiResponse.success(userDtos, "Pending restaurant owners"));
 	}
 
-	/**
-	 * Delete a user by email.
-	 */
 	@DeleteMapping("/customers/{email}")
 	public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable String email)
 			throws UserException {
@@ -61,11 +50,6 @@ public class SuperAdminController {
 		return ResponseEntity.ok(ApiResponse.success("User deleted successfully", "User deleted"));
 	}
 
-	// ── Restaurant Management ────────────────────────────────────────
-
-	/**
-	 * Get all restaurants (paginated).
-	 */
 	@GetMapping("/restaurants")
 	public ResponseEntity<ApiResponse<Page<RestaurantDto>>> getAllRestaurants(
 			@RequestParam(defaultValue = "0") int page,
@@ -75,9 +59,6 @@ public class SuperAdminController {
 		return ResponseEntity.ok(ApiResponse.success(restaurantDtos, "All restaurants"));
 	}
 
-	/**
-	 * Delete a restaurant by ID. SuperAdmin bypass — no ownership check.
-	 */
 	@DeleteMapping("/restaurants/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteRestaurant(@PathVariable Long id)
 			throws RestaurantException {
@@ -85,9 +66,6 @@ public class SuperAdminController {
 		return ResponseEntity.ok(ApiResponse.success("Restaurant deleted", "Restaurant deleted successfully"));
 	}
 
-	/**
-	 * Toggle restaurant open/closed status. SuperAdmin bypass — no ownership check.
-	 */
 	@PutMapping("/restaurants/{id}/status")
 	public ResponseEntity<ApiResponse<RestaurantDto>> updateRestaurantStatus(@PathVariable Long id)
 			throws RestaurantException {

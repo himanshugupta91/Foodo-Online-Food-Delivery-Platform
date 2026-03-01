@@ -27,14 +27,6 @@ public class NotificationController {
 	private final UserService userService;
 	private final NotificationMapper notificationMapper;
 
-
-	/**
-	 * Get notifications for the current user.
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return List of notifications.
-	 * @throws UserException If user not found.
-	 */
 	@GetMapping("/notifications")
 	public ResponseEntity<ApiResponse<List<NotificationDto>>> findUsersNotification(
 			@RequestHeader("Authorization") String jwt) throws UserException {

@@ -22,17 +22,6 @@ public class EventController {
 	private final EventsService eventService;
 	private final EventMapper eventMapper;
 
-
-
-
-	/**
-	 * Create an event for a restaurant.
-	 *
-	 * @param eventDto     The event details.
-	 * @param restaurantId The restaurant ID.
-	 * @return The created event.
-	 * @throws RestaurantException If restaurant not found.
-	 */
 	@PostMapping("/admin/events/restaurant/{restaurantId}")
 	public ResponseEntity<ApiResponse<EventDto>> createEvent(
 			@jakarta.validation.Valid @RequestBody CreateEventRequest request,
@@ -44,12 +33,6 @@ public class EventController {
 				HttpStatus.CREATED);
 	}
 
-	/**
-	 * Get all events.
-	 *
-	 * @return List of all events.
-	 * @throws RestaurantException If events not found.
-	 */
 	@GetMapping("/events")
 	public ResponseEntity<ApiResponse<List<EventDto>>> getAllEvents() throws RestaurantException {
 		List<Events> events = eventService.findAllEvents();
@@ -57,13 +40,6 @@ public class EventController {
 		return ResponseEntity.ok(ApiResponse.success(eventDtos, "All events"));
 	}
 
-	/**
-	 * Get events of a specific restaurant.
-	 *
-	 * @param restaurantId The restaurant ID.
-	 * @return List of events.
-	 * @throws RestaurantException If restaurant not found.
-	 */
 	@GetMapping("/admin/events/restaurant/{restaurantId}")
 	public ResponseEntity<ApiResponse<List<EventDto>>> getRestaurantEvents(
 			@PathVariable Long restaurantId) throws RestaurantException {
@@ -72,13 +48,6 @@ public class EventController {
 		return ResponseEntity.ok(ApiResponse.success(eventDtos, "Restaurant events"));
 	}
 
-	/**
-	 * Delete an event.
-	 *
-	 * @param id The event ID.
-	 * @return Success message.
-	 * @throws Exception If delete fails.
-	 */
 	@DeleteMapping("/admin/events/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteEvent(
 			@PathVariable Long id) throws Exception {

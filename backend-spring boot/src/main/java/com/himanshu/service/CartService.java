@@ -17,14 +17,11 @@ public interface CartService {
 	public Cart removeItemFromCart(Long cartItemId, String jwt) throws UserException, CartException, CartItemException;
 
 	public Long calculateCartTotals(Cart cart) throws UserException;
-	
-	public Cart findCartById(Long id) throws CartException;
-	
-	public Cart findCartByUserId(Long userId) throws CartException, UserException;
-	
-	public Cart clearCart(Long userId) throws CartException, UserException;
-	
 
-	
+	public Cart findCartById(Long id) throws CartException;
+
+	public Cart findCartByUserId(Long userId) throws CartException, UserException;
+
+	public Cart clearCart(Long userId) throws CartException, UserException;
 
 }

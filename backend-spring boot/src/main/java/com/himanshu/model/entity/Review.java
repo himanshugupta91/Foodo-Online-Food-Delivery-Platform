@@ -22,7 +22,7 @@ public class Review {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore // Prevent circular reference in DTO mapping if accidentally used
+    @JsonIgnore
     private User customer;
 
     @ManyToOne(fetch = FetchType.LAZY)

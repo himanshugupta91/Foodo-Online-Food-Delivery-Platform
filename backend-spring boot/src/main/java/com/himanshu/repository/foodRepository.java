@@ -10,17 +10,13 @@ import com.himanshu.model.entity.Food;
 
 public interface foodRepository extends JpaRepository<Food, Long> {
 
-	
 	List<Food> findByRestaurantId(Long restaurantId);
-	
+
 	@Query("SELECT f FROM Food f WHERE "
 			+ "f.name LIKE %:keyword% OR "
 			+ "f.foodCategory.name LIKE %:keyword% AND "
 			+ "f.restaurant!=null"
 	)
 	List<Food> searchByNameOrCategory(@Param("keyword") String keyword);
-
-
-	
 
 }

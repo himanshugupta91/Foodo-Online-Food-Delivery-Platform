@@ -43,7 +43,6 @@ public class Food {
 
     private boolean available;
 
-    // @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Restaurant restaurant;
 

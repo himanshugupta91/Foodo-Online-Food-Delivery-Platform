@@ -28,30 +28,12 @@ public class AdminOrderController {
 	private final OrderService orderService;
 	private final OrderMapper orderMapper;
 
-
-
-	/**
-	 * Cancel/Delete an order.
-	 *
-	 * @param orderId The ID of the order to delete.
-	 * @return Success message.
-	 * @throws OrderException If the order is not found.
-	 */
 	@DeleteMapping("/order/{orderId}")
 	public ResponseEntity<ApiResponse<String>> deleteOrder(@PathVariable Long orderId) throws OrderException {
 		orderService.cancelOrder(orderId);
 		return ResponseEntity.ok(ApiResponse.success("Order deleted with id " + orderId, "Order deleted"));
 	}
 
-	/**
-	 * Get all orders for a specific restaurant.
-	 *
-	 * @param restaurantId The restaurant ID.
-	 * @param order_status Optional filter by order status.
-	 * @return List of orders.
-	 * @throws OrderException      If orders not found.
-	 * @throws RestaurantException If restaurant not found.
-	 */
 	@GetMapping("/order/restaurant/{restaurantId}")
 	public ResponseEntity<ApiResponse<List<OrderDto>>> getAllRestaurantOrders(
 			@PathVariable Long restaurantId,
@@ -64,15 +46,6 @@ public class AdminOrderController {
 
 	}
 
-	/**
-	 * Update the status of an order.
-	 *
-	 * @param orderId     The order ID.
-	 * @param orderStatus The new status.
-	 * @return The updated order.
-	 * @throws OrderException      If order not found.
-	 * @throws RestaurantException If restaurant not found.
-	 */
 	@PutMapping("/order/{orderId}/{orderStatus}")
 	public ResponseEntity<ApiResponse<OrderDto>> updateOrderStatus(@PathVariable Long orderId,
 			@PathVariable String orderStatus)

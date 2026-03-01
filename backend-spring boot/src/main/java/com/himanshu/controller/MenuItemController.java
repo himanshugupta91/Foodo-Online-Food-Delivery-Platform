@@ -25,14 +25,6 @@ public class MenuItemController {
 	private final FoodService menuItemService;
 	private final RestaurantMapper restaurantMapper;
 
-
-
-	/**
-	 * Search for food items by name.
-	 *
-	 * @param name The search query.
-	 * @return List of matching food items.
-	 */
 	@GetMapping("/search")
 	public ResponseEntity<ApiResponse<List<FoodDto>>> searchFood(
 			@RequestParam String name) {
@@ -41,17 +33,6 @@ public class MenuItemController {
 		return ResponseEntity.ok(ApiResponse.success(foodDtos, "Search results"));
 	}
 
-	/**
-	 * Get food items by restaurant ID with filters.
-	 *
-	 * @param restaurantId  The restaurant ID.
-	 * @param vegetarian    Filter by vegetarian.
-	 * @param seasonal      Filter by seasonal.
-	 * @param nonveg        Filter by non-veg.
-	 * @param food_category Optional filter by category.
-	 * @return List of food items.
-	 * @throws FoodException If food not found.
-	 */
 	@GetMapping("/restaurant/{restaurantId}")
 	public ResponseEntity<ApiResponse<List<FoodDto>>> getRestaurantMenuItems(
 			@PathVariable Long restaurantId,

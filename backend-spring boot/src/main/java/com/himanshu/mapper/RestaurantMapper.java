@@ -32,7 +32,7 @@ public interface RestaurantMapper {
     @Mapping(source = "contactInformation", target = "contactInformation")
     RestaurantDto restaurantToRestaurantDto(Restaurant restaurant);
 
-    @Mapping(source = "ownerId", target = "owner.id", ignore = true) // Owner usually set by service
+    @Mapping(source = "ownerId", target = "owner.id", ignore = true)
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "foods", ignore = true)
@@ -58,8 +58,8 @@ public interface RestaurantMapper {
     @Mapping(source = "ingredients", target = "ingredients")
     FoodDto foodToFoodDto(Food food);
 
-    @Mapping(target = "foodCategory", ignore = true) // Handled manually or by separate mapper
-    @Mapping(target = "restaurant", ignore = true) // Handled manually
+    @Mapping(target = "foodCategory", ignore = true)
+    @Mapping(target = "restaurant", ignore = true)
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "ingredients", ignore = true)
     Food foodDtoToFood(FoodDto foodDto);

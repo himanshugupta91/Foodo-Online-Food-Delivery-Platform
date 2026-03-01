@@ -39,12 +39,8 @@ public class Order {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Address deliveryAddress;
 
-	// @JsonIgnore
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // Added cascade and mappedBy if OrderItem has 'order'
-																// field. verify that. I'll check OrderItem later. For
-																// now just OneToMany might be default unidirectional.
-	// Wait, OrderItem has no 'order' field in my previous check? I need to check
-	// OrderItem again.
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+
 	private List<OrderItem> items;
 
 	@OneToOne(fetch = FetchType.LAZY)
@@ -52,11 +48,7 @@ public class Order {
 
 	private int totalItem;
 
-	// Removing redundant totalPrice if totalAmount is used, or keeping for backward
-	// compatibility but ensuring consistency.
-	// totalAmount is Long, totalPrice is int. keeping both for now but creating
-	// DTOs will hide this mess.
-	private Long totalPrice; // Changed to Long to match totalAmount preference usually.
+	private Long totalPrice;
 
 	private Long discount;
 

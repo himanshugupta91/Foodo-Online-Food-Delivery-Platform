@@ -27,7 +27,7 @@ public class Coupon {
     private Long discountAmount;
 
     @Builder.Default
-    private int discountPercentage = 0; // Optional: separate field if we want to support both
+    private int discountPercentage = 0;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date validityPeriod;

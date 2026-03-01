@@ -38,20 +38,6 @@ public class OrderController {
 	private final UserService userService;
 	private final OrderMapper orderMapper;
 
-
-
-	/**
-	 * Create a new order.
-	 *
-	 * @param order The order request.
-	 * @param jwt   The JWT token of the user.
-	 * @return The payment response.
-	 * @throws UserException       If user not found.
-	 * @throws RestaurantException If restaurant not found.
-	 * @throws CartException       If cart error.
-	 * @throws StripeException     If payment error.
-	 * @throws OrderException      If order error.
-	 */
 	@PostMapping("/order")
 	public ResponseEntity<ApiResponse<PaymentResponse>> createOrder(@Valid @RequestBody CreateOrderRequest order,
 			@RequestHeader("Authorization") String jwt)
@@ -64,14 +50,6 @@ public class OrderController {
 		return ResponseEntity.ok(ApiResponse.success(paymentResponse, "Order created successfully"));
 	}
 
-	/**
-	 * Get all orders of the current user.
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return List of orders.
-	 * @throws OrderException If order error.
-	 * @throws UserException  If user not found.
-	 */
 	@GetMapping("/order/user")
 	public ResponseEntity<ApiResponse<List<OrderDto>>> getUserOrders(@RequestHeader("Authorization") String jwt)
 			throws OrderException, UserException {
@@ -82,14 +60,6 @@ public class OrderController {
 		return ResponseEntity.ok(ApiResponse.success(orderDtos, "User orders"));
 	}
 
-	/**
-	 * Verify a Stripe payment session.
-	 *
-	 * @param sessionId The Stripe session ID.
-	 * @param jwt       The JWT token of the user.
-	 * @return The verified order.
-	 * @throws Exception If verification fails.
-	 */
 	@GetMapping("/payment/verify")
 	public ResponseEntity<ApiResponse<OrderDto>> verifyPayment(
 			@RequestParam String session_id,

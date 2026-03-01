@@ -48,7 +48,6 @@ public class CartServiceImpl implements CartService {
 
 		Cart cart = findCartByUserId(user.getId());
 
-		// Cross-restaurant validation
 		if (!cart.getItems().isEmpty()) {
 			Long existingRestaurantId = cart.getItems().get(0).getFood().getRestaurant().getId();
 			Long newRestaurantId = menuItem.get().getRestaurant().getId();
@@ -77,7 +76,6 @@ public class CartServiceImpl implements CartService {
 		CartItem savedItem = cartItemRepository.save(newCartItem);
 		cart.getItems().add(savedItem);
 
-		// Recalculate total
 		cart.setTotal(calculateCartTotals(cart));
 		cartRepository.save(cart);
 
@@ -101,7 +99,7 @@ public class CartServiceImpl implements CartService {
 			cart.setTotal(calculateCartTotals(cart));
 			cartRepository.save(cart);
 		} catch (UserException e) {
-			// Should not happen as we are passing the cart directly
+
 			throw new RuntimeException(e);
 		}
 
@@ -125,7 +123,6 @@ public class CartServiceImpl implements CartService {
 
 		cart.getItems().remove(cartItem.get());
 
-		// Recalculate total
 		cart.setTotal(calculateCartTotals(cart));
 
 		return cartRepository.save(cart);

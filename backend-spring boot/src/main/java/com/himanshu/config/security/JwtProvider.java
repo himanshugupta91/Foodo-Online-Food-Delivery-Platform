@@ -36,7 +36,6 @@ public class JwtProvider {
 		Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
 		String roles = populateAuthorities(authorities);
 
-		// 15 Minutes = 900,000 milliseconds
 		return Jwts.builder()
 				.issuedAt(new Date())
 				.expiration(new Date(new Date().getTime() + 900_000))
@@ -47,7 +46,7 @@ public class JwtProvider {
 	}
 
 	public String generateRefreshToken(Authentication auth) {
-		// 7 Days = 604,800,000 milliseconds
+
 		return Jwts.builder()
 				.issuedAt(new Date())
 				.expiration(new Date(new Date().getTime() + 604_800_000))

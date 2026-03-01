@@ -26,17 +26,6 @@ public class CategoryController {
 	private final UserService userService;
 	private final RestaurantMapper restaurantMapper;
 
-
-
-	/**
-	 * Create a new category.
-	 *
-	 * @param jwt         The JWT token of the admin.
-	 * @param categoryDto The category details.
-	 * @return The created category.
-	 * @throws RestaurantException If restaurant not found.
-	 * @throws UserException       If user not found.
-	 */
 	@PostMapping("/admin/category")
 	public ResponseEntity<ApiResponse<CategoryDto>> createCategory(
 			@RequestHeader("Authorization") String jwt,
@@ -48,15 +37,6 @@ public class CategoryController {
 		return ResponseEntity.ok(ApiResponse.success(createdCategoryDto, "Category created"));
 	}
 
-	/**
-	 * Get categories of a restaurant.
-	 *
-	 * @param id  The restaurant ID.
-	 * @param jwt The JWT token of the user.
-	 * @return List of categories.
-	 * @throws RestaurantException If restaurant not found.
-	 * @throws UserException       If user not found.
-	 */
 	@GetMapping("/admin/category/restaurant/{id}")
 	public ResponseEntity<ApiResponse<List<CategoryDto>>> getRestaurantsCategory(
 			@PathVariable Long id,
@@ -67,15 +47,6 @@ public class CategoryController {
 		return ResponseEntity.ok(ApiResponse.success(categoryDtos, "Restaurant categories"));
 	}
 
-	/**
-	 * Delete a category by ID.
-	 *
-	 * @param id  The category ID.
-	 * @param jwt The JWT token of the admin.
-	 * @return Success message.
-	 * @throws RestaurantException If category not found.
-	 * @throws UserException       If user not found.
-	 */
 	@DeleteMapping("/admin/category/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteCategory(
 			@PathVariable Long id,

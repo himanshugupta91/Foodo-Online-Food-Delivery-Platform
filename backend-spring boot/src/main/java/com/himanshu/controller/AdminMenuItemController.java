@@ -38,17 +38,6 @@ public class AdminMenuItemController {
 	private final UserService userService;
 	private final RestaurantMapper restaurantMapper;
 
-
-	/**
-	 * Create a new food item.
-	 *
-	 * @param item The food creation request.
-	 * @param jwt  The JWT token of the admin.
-	 * @return The created food item.
-	 * @throws FoodException       If food creation fails.
-	 * @throws UserException       If user authentication fails.
-	 * @throws RestaurantException If restaurant not found.
-	 */
 	@PostMapping()
 	public ResponseEntity<ApiResponse<FoodDto>> createItem(
 			@Valid @RequestBody CreateFoodRequest item,
@@ -61,15 +50,6 @@ public class AdminMenuItemController {
 
 	}
 
-	/**
-	 * Delete a food item by ID.
-	 *
-	 * @param id  The food item ID.
-	 * @param jwt The JWT token of the admin.
-	 * @return Success message.
-	 * @throws UserException If user authentication fails.
-	 * @throws FoodException If food item not found.
-	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteItem(@PathVariable Long id,
 			@RequestHeader("Authorization") String jwt)
@@ -81,12 +61,6 @@ public class AdminMenuItemController {
 
 	}
 
-	/**
-	 * Search for food items by name.
-	 *
-	 * @param name The search query.
-	 * @return List of matching food items.
-	 */
 	@GetMapping("/search")
 	public ResponseEntity<ApiResponse<List<FoodDto>>> searchFoodItems(@RequestParam String name) {
 		List<Food> menuItem = menuItemService.searchFood(name);
@@ -94,13 +68,6 @@ public class AdminMenuItemController {
 		return ResponseEntity.ok(ApiResponse.success(foodDtos, "Search results"));
 	}
 
-	/**
-	 * Update availability status of a food item.
-	 *
-	 * @param id The food item ID.
-	 * @return The updated food item.
-	 * @throws FoodException If food item not found.
-	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<FoodDto>> updateAvailabilityStatus(
 			@PathVariable Long id) throws FoodException {

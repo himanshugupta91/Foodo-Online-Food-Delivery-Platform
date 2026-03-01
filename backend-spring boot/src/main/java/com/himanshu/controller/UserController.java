@@ -21,13 +21,6 @@ public class UserController {
 	private final UserService userService;
 	private final UserMapper userMapper;
 
-	/**
-	 * Get user profile.
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return The user profile.
-	 * @throws UserException If user not found.
-	 */
 	@GetMapping("/profile")
 	public ResponseEntity<ApiResponse<UserDto>> getUserProfile(@RequestHeader("Authorization") String jwt)
 			throws UserException {

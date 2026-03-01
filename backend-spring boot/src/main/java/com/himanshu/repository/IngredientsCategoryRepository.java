@@ -8,11 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.himanshu.model.entity.IngredientCategory;
 
-public interface IngredientsCategoryRepository 
+public interface IngredientsCategoryRepository
 extends JpaRepository<IngredientCategory, Long>{
-	
-	
-//	List<IngredientCategory> findByFoodId(Long menuItemId);
+
 	List<IngredientCategory> findByRestaurantId(Long id);
 
 	@Query("SELECT e FROM IngredientCategory e "

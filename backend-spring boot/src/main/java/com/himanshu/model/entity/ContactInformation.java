@@ -15,6 +15,4 @@ public class ContactInformation {
     private String twitter;
     private String instagram;
 
-   
 }
-

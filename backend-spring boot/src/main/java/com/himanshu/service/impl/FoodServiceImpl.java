@@ -63,7 +63,7 @@ public class FoodServiceImpl implements FoodService {
 		Food food = findFoodById(foodId);
 		food.setRestaurant(null);
 		;
-		// foodRepository.save(food);
+
 		foodRepository.delete(food);
 
 	}
@@ -120,7 +120,7 @@ public class FoodServiceImpl implements FoodService {
 					if (food.getFoodCategory() != null) {
 						return food.getFoodCategory().getName().equals(foodCategory);
 					}
-					return false; // Return true if food category is null
+					return false;
 				})
 				.collect(Collectors.toList());
 	}

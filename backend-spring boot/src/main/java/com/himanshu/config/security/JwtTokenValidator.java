@@ -38,7 +38,6 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		String authHeader = request.getHeader(JwtConstant.JWT_HEADER);
 
-		// No bearer token: leave context empty and continue (public endpoints still work).
 		if (!AuthHeaderUtils.hasBearerPrefix(authHeader)) {
 			filterChain.doFilter(request, response);
 			return;
@@ -61,10 +60,9 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 			List<GrantedAuthority> auths = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
 			Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auths);
 
-			// Authenticated request context used by role checks in SecurityConfig.
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		} catch (Exception e) {
-			// Invalid/expired token should not leak stale auth between requests.
+
 			SecurityContextHolder.clearContext();
 		}
 		filterChain.doFilter(request, response);

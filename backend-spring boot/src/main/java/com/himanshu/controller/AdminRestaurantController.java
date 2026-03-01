@@ -35,14 +35,6 @@ public class AdminRestaurantController {
 	private final UserService userService;
 	private final RestaurantMapper restaurantMapper;
 
-	/**
-	 * Create a new restaurant.
-	 *
-	 * @param req The restaurant creation request.
-	 * @param jwt The JWT token of the user.
-	 * @return The created restaurant.
-	 * @throws UserException If the user is not found.
-	 */
 	@PostMapping()
 	public ResponseEntity<ApiResponse<RestaurantDto>> createRestaurant(
 			@RequestBody CreateRestaurantRequest req,
@@ -55,22 +47,12 @@ public class AdminRestaurantController {
 		return new ResponseEntity<>(ApiResponse.success(dto, "Restaurant created successfully"), HttpStatus.CREATED);
 	}
 
-	/**
-	 * Update an existing restaurant.
-	 *
-	 * @param id  The restaurant ID.
-	 * @param req The update request.
-	 * @param jwt The JWT token of the user.
-	 * @return The updated restaurant.
-	 * @throws RestaurantException If the restaurant is not found.
-	 * @throws UserException       If the user is not found.
-	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<RestaurantDto>> updateRestaurant(
 			@PathVariable Long id,
 			@RequestBody CreateRestaurantRequest req,
 			@RequestHeader("Authorization") String jwt) throws RestaurantException, UserException {
-		userService.findUserProfileByJwt(jwt); // verify auth
+		userService.findUserProfileByJwt(jwt);
 
 		Restaurant updatedRestaurant = restaurantService.updateRestaurant(id, req);
 		RestaurantDto dto = restaurantMapper.restaurantToRestaurantDto(updatedRestaurant);
@@ -78,15 +60,6 @@ public class AdminRestaurantController {
 
 	}
 
-	/**
-	 * Delete a restaurant.
-	 *
-	 * @param restaurantId The restaurant ID.
-	 * @param jwt          The JWT token of the user.
-	 * @return Success message.
-	 * @throws RestaurantException If the restaurant is not found.
-	 * @throws UserException       If the user is not found.
-	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<String>> deleteRestaurantById(
 			@PathVariable("id") Long restaurantId,
@@ -99,15 +72,6 @@ public class AdminRestaurantController {
 		return ResponseEntity.ok(res);
 	}
 
-	/**
-	 * Update restaurant status (open/closed).
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @param id  The restaurant ID.
-	 * @return The updated restaurant.
-	 * @throws RestaurantException If the restaurant is not found.
-	 * @throws UserException       If the user is not found.
-	 */
 	@PutMapping("/{id}/status")
 	public ResponseEntity<ApiResponse<RestaurantDto>> updateRestaurantStatus(
 			@RequestHeader("Authorization") String jwt,
@@ -131,14 +95,6 @@ public class AdminRestaurantController {
 		return ResponseEntity.ok(ApiResponse.success(dto, "Admin added successfully"));
 	}
 
-	/**
-	 * Find restaurant by user ID (owner).
-	 *
-	 * @param jwt The JWT token of the user.
-	 * @return The restaurant owned by the user.
-	 * @throws RestaurantException If no restaurant is found.
-	 * @throws UserException       If the user is not found.
-	 */
 	@GetMapping("/user")
 	public ResponseEntity<ApiResponse<RestaurantDto>> findRestaurantByUserId(
 			@RequestHeader("Authorization") String jwt) throws RestaurantException, UserException {
@@ -149,13 +105,6 @@ public class AdminRestaurantController {
 
 	}
 
-	/**
-	 * Get all restaurants.
-	 *
-	 * @param page Page number (default 0).
-	 * @param size Page size (default 10).
-	 * @return Page of restaurants.
-	 */
 	@GetMapping()
 	public ResponseEntity<ApiResponse<Page<RestaurantDto>>> getAllRestaurants(
 			@RequestParam(defaultValue = "0") int page,

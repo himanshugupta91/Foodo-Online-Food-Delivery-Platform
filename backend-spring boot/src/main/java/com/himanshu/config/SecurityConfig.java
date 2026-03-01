@@ -26,12 +26,9 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        // Stateless API: every request is authorized from JWT, never from server
-        // session.
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(Authorize -> Authorize
-                        // Matchers are evaluated in order; keep specific role gates above generic
-                        // /api/v1/**.
+
                         .requestMatchers("/api/v1/super-admin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("RESTAURANT_OWNER", "SUPER_ADMIN")
                         .requestMatchers("/api/v1/cart/**", "/api/v1/cart-item/**").hasRole("CUSTOMER")
@@ -44,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/review/**").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll())
-                // JWT filter populates SecurityContext before Spring authorization runs.
+
                 .addFilterBefore(jwtTokenValidator, BasicAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))

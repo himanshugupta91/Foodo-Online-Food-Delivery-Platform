@@ -19,6 +19,6 @@ public class ReviewDto {
     private String message;
     private double rating;
     private LocalDateTime createdAt;
-    private List<String> images; // Assuming reviews might have images later, but for now matching
-                                 // ReviewRequest/Entity
+    private List<String> images;
+
 }

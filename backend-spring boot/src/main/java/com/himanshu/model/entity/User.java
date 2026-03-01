@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "users") // Good practice to pluralize table names
+@Table(name = "users")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class User {
 
@@ -40,12 +40,12 @@ public class User {
 
 	@NotBlank(message = "Password is required")
 	@Size(min = 6, message = "Password must be at least 6 characters")
-	@JsonIgnore // Prevent exposure even if Entity is accidentally returned
+	@JsonIgnore
 	private String password;
 
 	@Builder.Default
-	@Enumerated(EnumType.STRING) // Explicitly map enum as string
-	private UserRole role = UserRole.ROLE_CUSTOMER; // Default role
+	@Enumerated(EnumType.STRING)
+	private UserRole role = UserRole.ROLE_CUSTOMER;
 
 	@Builder.Default
 	@JsonIgnore
@@ -62,7 +62,7 @@ public class User {
 
 	@Builder.Default
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private List<Address> addresses = new ArrayList<>(); // Initialize to avoid nulls
+	private List<Address> addresses = new ArrayList<>();
 
 	@Builder.Default
 	@ElementCollection

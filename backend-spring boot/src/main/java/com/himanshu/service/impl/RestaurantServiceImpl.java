@@ -47,9 +47,6 @@ public class RestaurantServiceImpl implements RestaurantService {
 		return restaurantRepository.save(restaurant);
 	}
 
-	/**
-	 * Verify that user is the owner or an administrator of the restaurant.
-	 */
 	private void verifyOwnership(Restaurant restaurant, User user) throws RestaurantException {
 		boolean isOwner = restaurant.getOwner() != null && restaurant.getOwner().getId().equals(user.getId());
 		boolean isManager = restaurant.getAdministrators().stream()
